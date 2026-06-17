@@ -1,0 +1,29 @@
+import { getApiData, postApiData } from './api-client';
+import type { 
+  RealEstateListing, 
+  RealEstateOwnerSubmission, 
+  RealEstateInquiry 
+} from './types';
+
+const BASE_URL = '/real-estate';
+
+export const realEstateService = {
+  // --- Listings ---
+  listRealEstateListings: async (params?: Record<string, any>) => {
+    return await getApiData<RealEstateListing[]>(`${BASE_URL}/listings`, params);
+  },
+
+  getRealEstateListing: async (slug: string) => {
+    return await getApiData<RealEstateListing>(`${BASE_URL}/listings/${slug}`);
+  },
+
+  // --- Submissions ---
+  createRealEstateSubmission: async (payload: Partial<RealEstateOwnerSubmission>) => {
+    return await postApiData<RealEstateOwnerSubmission>(`${BASE_URL}/owner-submissions`, payload);
+  },
+
+  // --- Inquiries ---
+  createRealEstateInquiry: async (payload: Partial<RealEstateInquiry>) => {
+    return await postApiData<RealEstateInquiry>(`${BASE_URL}/inquiries`, payload);
+  },
+};
