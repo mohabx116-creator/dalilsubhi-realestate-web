@@ -33,8 +33,8 @@ export function PropertiesPage() {
     <main className="min-h-screen bg-surface py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
         <div className="mb-12">
-          <h1 className="text-3xl font-black text-primary mb-4">عقارات المنطقة</h1>
-          <p className="text-on-surface-variant">تصفح الشقق والوحدات السكنية المتاحة للبيع.</p>
+          <h1 className="text-3xl font-black text-[#f6f1df] mb-4 drop-shadow-md">عقارات المنطقة</h1>
+          <p className="text-[#f6f1df] drop-shadow-sm">تصفح الشقق والوحدات السكنية المتاحة للبيع.</p>
         </div>
 
         {listings.length === 0 ? (
@@ -62,14 +62,14 @@ export function PropertiesPage() {
                       <Building2 className="w-12 h-12 text-outline/30" />
                     </div>
                   )}
-                  <div className="absolute top-4 right-4 px-3 py-1 bg-white/90 backdrop-blur-sm rounded-full text-xs font-bold text-primary">
+                  <div className="absolute top-4 right-4 px-3 py-1 bg-white/90 backdrop-blur-sm rounded-full text-xs font-bold text-[#111b10] shadow-sm">
                     {realEstateTypeLabels[listing.type]}
                   </div>
                 </div>
 
                 <div className="p-6">
-                  <h3 className="text-lg font-bold text-on-surface mb-2 line-clamp-1">{listing.title}</h3>
-                  <div className="text-2xl font-black text-primary mb-4" dir="ltr">
+                  <h3 className="text-lg font-bold text-[#111b10] mb-2 line-clamp-1">{listing.title}</h3>
+                  <div className="text-2xl font-black text-[#0f4f3a] mb-4" dir="ltr">
                     {formatCurrency(listing.price)}
                   </div>
 

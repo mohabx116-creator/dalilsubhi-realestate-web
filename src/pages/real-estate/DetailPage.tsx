@@ -131,8 +131,8 @@ export function DetailPage() {
           </div>
 
           <div className="lg:col-span-1">
-            <div className="bg-white rounded-3xl p-6 shadow-sm border border-outline/10 sticky top-24">
-              <h3 className="text-xl font-bold text-primary mb-6">الاهتمام بالعقار</h3>
+            <div className="bg-gradient-to-b from-[#fdfbf7] to-white rounded-3xl p-6 shadow-xl border border-[#c49a3a]/20 sticky top-24">
+              <h3 className="text-xl font-bold text-[#111b10] mb-6">الاهتمام بالعقار</h3>
               
               {success ? (
                 <div className="text-center py-8">
@@ -152,11 +152,11 @@ export function DetailPage() {
               ) : (
                 <form onSubmit={handleSubmit} className="space-y-4">
                   <div>
-                    <label className="block text-sm font-bold text-on-surface mb-2">نوع الطلب</label>
+                    <label className="block text-sm font-bold text-[#111b10] mb-2">نوع الطلب</label>
                     <select
                       value={inquiryType}
                       onChange={(e) => setInquiryType(e.target.value as any)}
-                      className="w-full px-4 py-3 rounded-xl border border-outline/20 bg-surface focus:outline-none focus:ring-2 focus:ring-primary/20"
+                      className="w-full px-4 py-3 rounded-xl border border-[#c49a3a]/30 bg-white text-[#111b10] focus:outline-none focus:ring-2 focus:ring-[#c49a3a]/30 focus:border-[#c49a3a] transition-all"
                     >
                       <option value="CONTACT">استفسار عام</option>
                       <option value="INSPECTION">طلب معاينة</option>
@@ -164,24 +164,24 @@ export function DetailPage() {
                     </select>
                   </div>
                   <div>
-                    <label className="block text-sm font-bold text-on-surface mb-2">الاسم بالكامل</label>
+                    <label className="block text-sm font-bold text-[#111b10] mb-2">الاسم بالكامل</label>
                     <input
                       required
                       type="text"
                       value={name}
                       onChange={(e) => setName(e.target.value)}
-                      className="w-full px-4 py-3 rounded-xl border border-outline/20 bg-surface focus:outline-none focus:ring-2 focus:ring-primary/20"
+                      className="w-full px-4 py-3 rounded-xl border border-[#c49a3a]/30 bg-white text-[#111b10] placeholder-[#0f4f3a]/40 focus:outline-none focus:ring-2 focus:ring-[#c49a3a]/30 focus:border-[#c49a3a] transition-all"
                       placeholder="اكتب اسمك الثلاثي"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-bold text-on-surface mb-2">رقم الهاتف</label>
+                    <label className="block text-sm font-bold text-[#111b10] mb-2">رقم الهاتف</label>
                     <input
                       required
                       type="tel"
                       value={phone}
                       onChange={(e) => setPhone(e.target.value)}
-                      className="w-full px-4 py-3 rounded-xl border border-outline/20 bg-surface focus:outline-none focus:ring-2 focus:ring-primary/20"
+                      className="w-full px-4 py-3 rounded-xl border border-[#c49a3a]/30 bg-white text-[#111b10] placeholder-[#0f4f3a]/40 focus:outline-none focus:ring-2 focus:ring-[#c49a3a]/30 focus:border-[#c49a3a] transition-all"
                       placeholder="رقم الهاتف للتواصل"
                       dir="ltr"
                     />
@@ -189,11 +189,11 @@ export function DetailPage() {
                   <button
                     type="submit"
                     disabled={inquiryMutation.isPending}
-                    className="w-full mt-4 inline-flex items-center justify-center gap-2 px-6 py-4 rounded-xl bg-primary text-white font-bold hover:bg-primary/90 transition-colors disabled:opacity-50"
+                    className="w-full mt-4 inline-flex items-center justify-center gap-2 px-6 py-4 rounded-xl bg-[#111b10] text-[#c49a3a] font-bold hover:bg-[#111b10]/90 transition-all shadow-lg hover:-translate-y-1 disabled:opacity-50 disabled:hover:translate-y-0"
                   >
                     {inquiryMutation.isPending ? 'جاري الإرسال...' : 'إرسال الطلب'}
                   </button>
-                  <p className="text-xs text-center text-on-surface-variant mt-4">
+                  <p className="text-xs text-center text-[#0f4f3a]/80 mt-4 leading-relaxed">
                     بإرسالك الطلب، سيتم مراجعة بياناتك والتواصل معك لترتيب المعاينة. لن يتم عرض بياناتك للعامة.
                   </p>
                 </form>
