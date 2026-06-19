@@ -8,7 +8,13 @@ import { ROUTES } from '../../lib/constants/routes';
 export function PropertiesPage() {
   const { data, isLoading, error } = useQuery({
     queryKey: ['real-estate', 'listings', 'properties'],
-    queryFn: () => realEstateService.listRealEstateListings({ type: 'APARTMENT' }), // Ideally backend handles multiple types, for now just APARTMENT
+    queryFn: async () => {
+      const response = await realEstateService.listRealEstateListings();
+      return {
+        ...response,
+        data: response.data.filter(listing => listing.type !== 'LAND')
+      };
+    },
   });
 
   if (isLoading) {
