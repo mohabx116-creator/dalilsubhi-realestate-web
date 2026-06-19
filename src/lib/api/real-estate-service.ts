@@ -10,7 +10,17 @@ const BASE_URL = '/real-estate';
 export const realEstateService = {
   // --- Listings ---
   listRealEstateListings: async (params?: Record<string, any>) => {
-    return await getApiData<RealEstateListing[]>(`${BASE_URL}/listings`, params);
+    const response = await getApiData<any>(`${BASE_URL}/listings`, params);
+    
+    let items: RealEstateListing[] = [];
+    if (Array.isArray(response.data)) {
+      items = response.data;
+    } else if (response.data && typeof response.data === 'object') {
+      if (Array.isArray(response.data.items)) items = response.data.items;
+      else if (Array.isArray(response.data.listings)) items = response.data.listings;
+    }
+
+    return { ...response, data: items };
   },
 
   getRealEstateListing: async (slug: string) => {

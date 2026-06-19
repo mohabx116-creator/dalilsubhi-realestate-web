@@ -53,7 +53,7 @@ export interface ApiData<T> {
 }
 
 function unwrapApiData<T>(body: unknown, status: number): ApiData<T> {
-  if (!isRecord(body) || typeof body.success !== 'boolean' || typeof body.message !== 'string') {
+  if (!isRecord(body) || typeof body.success !== 'boolean') {
     throw new ApiClientError('Unexpected API response shape', 'INVALID_RESPONSE', status, body);
   }
 
@@ -66,7 +66,7 @@ function unwrapApiData<T>(body: unknown, status: number): ApiData<T> {
     throw new ApiClientError('API response did not include data', 'INVALID_RESPONSE', status, response);
   }
 
-  return { data: response.data, meta: response.meta, message: response.message };
+  return { data: response.data, meta: response.meta, message: response.message || '' };
 }
 
 function normalizeApiError(error: unknown): ApiClientError {
