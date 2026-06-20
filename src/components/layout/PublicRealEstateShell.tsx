@@ -1,4 +1,4 @@
-import { Home, Mail, Megaphone, Phone } from 'lucide-react';
+import { Home, Megaphone } from 'lucide-react';
 import { Link, Outlet } from 'react-router-dom';
 import dalilSubhiLogo from '../../assets/dalil-subhi-logo.jpg';
 import { ROUTES } from '../../lib/constants/routes';
@@ -48,30 +48,6 @@ export function PublicRealEstateShell() {
             </div>
 
             <div className="space-y-3">
-              <h3 className="text-base font-bold text-[#1f2c22]">للتواصل والدعم</h3>
-              <div className="mt-2 flex flex-col gap-2">
-                <a
-                  href="https://chat.whatsapp.com/ECEZfbsvjlU43eDvKa9XUu"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex w-fit items-center gap-2 text-sm text-emerald-600 transition-colors hover:text-emerald-700"
-                >
-                  <span className="h-2 w-2 rounded-full bg-emerald-500" />
-                  خدمة العملاء
-                </a>
-                <a
-                  href="https://www.facebook.com/share/g/1CzbCwjugk/?mibextid=KtfwRi"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex w-fit items-center gap-2 text-sm text-blue-600 transition-colors hover:text-blue-700"
-                >
-                  <span className="h-2 w-2 rounded-full bg-blue-500" />
-                  جروب الفيس بوك
-                </a>
-              </div>
-            </div>
-
-            <div className="space-y-3">
               <h3 className="text-base font-bold text-[#1f2c22]">روابط مهمة</h3>
               <ul className="space-y-2 text-sm text-[#5f6e62]">
                 <li>
@@ -107,27 +83,6 @@ export function PublicRealEstateShell() {
               </ul>
             </div>
 
-            <div className="space-y-3">
-              <h3 className="text-base font-bold text-[#1f2c22]">للتواصل والدعم</h3>
-              <div className="mt-2 flex flex-col gap-2">
-                <a
-                  className="flex w-fit items-center gap-2 text-sm text-[#5f6e62] transition-colors hover:text-emerald-700"
-                  href="https://wa.me/201224591618"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <Phone className="h-4 w-4 text-emerald-600" />
-                  <span dir="ltr">01224591618</span>
-                </a>
-                <a
-                  className="flex w-fit items-center gap-2 text-sm text-[#5f6e62] transition-colors hover:text-emerald-700"
-                  href="mailto:dalilsubhi@gmail.com"
-                >
-                  <Mail className="h-4 w-4 text-emerald-600" />
-                  <span dir="ltr">dalilsubhi@gmail.com</span>
-                </a>
-              </div>
-            </div>
           </div>
 
           <div className="mt-8 border-t border-[#e4dac5] pt-6 text-center">
