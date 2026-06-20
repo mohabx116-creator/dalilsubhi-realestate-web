@@ -4,51 +4,65 @@ import { ROUTES } from '../../lib/constants/routes';
 
 export function HomePage() {
   return (
-    <main className="min-h-screen bg-surface flex flex-col items-center pt-24 px-4 sm:px-6 lg:px-8">
-      <div className="text-center max-w-3xl mb-16">
-        <h1 className="text-4xl md:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-[#f6f1df] to-[#c49a3a] mb-6 drop-shadow-xl" style={{ filter: 'drop-shadow(0px 4px 12px rgba(0,0,0,0.5))' }}>عقارات دليل السبحي</h1>
-        <p className="text-lg md:text-xl text-[#f6f1df] drop-shadow-md">بوابة مخصصة لعرض عقارات وأراضي المنطقة للبيع بطريقة واضحة وآمنة.</p>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 w-full max-w-5xl">
-        <div className="bg-[#fdfbf7] rounded-3xl p-8 shadow-lg border-2 border-[#c49a3a]/30 hover:border-[#c49a3a]/60 hover:-translate-y-1 transition-all flex flex-col items-center text-center">
-          <div className="w-20 h-20 rounded-2xl bg-[#0f4f3a]/10 flex items-center justify-center mb-6">
-            <Building2 className="w-10 h-10 text-[#0f4f3a]" />
-          </div>
-          <h2 className="text-2xl font-bold text-[#111b10] mb-4">عقارات المنطقة</h2>
-          <p className="text-[#0f4f3a]/80 font-medium mb-8 flex-grow">تصفح الشقق والوحدات السكنية المتاحة للبيع.</p>
-          <Link
-            to={ROUTES.PROPERTIES}
-            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-4 rounded-full bg-[#111b10] text-[#c49a3a] font-bold hover:bg-[#111b10]/90 transition-colors shadow-md"
-          >
-            تصفح العقارات
-          </Link>
+    <main className="min-h-[calc(100dvh-4rem)] bg-[#f7f2e8] px-4 py-14 sm:px-6 lg:px-8">
+      <section className="mx-auto max-w-7xl">
+        <div className="mx-auto max-w-3xl text-center">
+          <span className="inline-flex items-center gap-2 rounded-full border border-[#e4dac5] bg-white/75 px-4 py-2 text-sm font-bold text-tertiary shadow-sm backdrop-blur-md">
+            <Building2 className="h-4 w-4" />
+            عقارات دليل السبحي
+          </span>
+          <h1 className="mt-6 text-4xl font-black leading-tight text-[#1f2c22] sm:text-5xl">
+            عقارات المنطقة
+          </h1>
+          <p className="mx-auto mt-5 max-w-2xl text-lg leading-9 text-[#5f6e62]">
+            بوابة مخصصة لعرض عقارات وأراضي المنطقة للبيع بطريقة واضحة وآمنة ومريحة للعين.
+          </p>
         </div>
 
-        <div className="bg-[#fdfbf7] rounded-3xl p-8 shadow-lg border-2 border-[#c49a3a]/30 hover:border-[#c49a3a]/60 hover:-translate-y-1 transition-all flex flex-col items-center text-center">
-          <div className="w-20 h-20 rounded-2xl bg-[#D4AF37]/10 flex items-center justify-center mb-6">
-            <Map className="w-10 h-10 text-[#D4AF37]" />
+        <div className="mt-12 grid gap-8 md:grid-cols-2">
+          <div className="glass-panel rounded-[32px] p-8 text-center transition hover:-translate-y-1">
+            <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-3xl bg-secondary/10 text-secondary">
+              <Building2 className="h-10 w-10" />
+            </div>
+            <h2 className="text-2xl font-black text-[#1f2c22]">عقارات المنطقة</h2>
+            <p className="mt-4 text-[#5f6e62] leading-8">
+              تصفح الشقق والوحدات السكنية المتاحة للبيع.
+            </p>
+            <Link
+              to={ROUTES.PROPERTIES}
+              className="mt-8 inline-flex min-h-12 items-center justify-center rounded-full bg-secondary px-8 py-3 text-sm font-black text-white shadow-lg shadow-secondary/20 transition hover:bg-secondary/90"
+            >
+              تصفح العقارات
+            </Link>
           </div>
-          <h2 className="text-2xl font-bold text-[#111b10] mb-4">أراضي المنطقة</h2>
-          <p className="text-[#0f4f3a]/80 font-medium mb-8 flex-grow">استعرض الأراضي المتاحة للبيع داخل المنطقة وحولها.</p>
+
+          <div className="glass-panel rounded-[32px] p-8 text-center transition hover:-translate-y-1">
+            <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-3xl bg-tertiary/15 text-tertiary">
+              <Map className="h-10 w-10" />
+            </div>
+            <h2 className="text-2xl font-black text-[#1f2c22]">أراضي المنطقة</h2>
+            <p className="mt-4 text-[#5f6e62] leading-8">
+              استعرض الأراضي المتاحة للبيع داخل المنطقة وحولها.
+            </p>
+            <Link
+              to={ROUTES.LANDS}
+              className="mt-8 inline-flex min-h-12 items-center justify-center rounded-full bg-secondary px-8 py-3 text-sm font-black text-white shadow-lg shadow-secondary/20 transition hover:bg-secondary/90"
+            >
+              تصفح الأراضي
+            </Link>
+          </div>
+        </div>
+
+        <div className="mt-14 text-center">
+          <p className="text-lg font-semibold text-[#1f2c22]">هل تمتلك عقاراً أو أرضاً للبيع؟</p>
           <Link
-            to={ROUTES.LANDS}
-            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-4 rounded-full bg-[#111b10] text-[#c49a3a] font-bold hover:bg-[#111b10]/90 transition-colors shadow-md"
+            to={ROUTES.SELL}
+            className="mt-6 inline-flex items-center justify-center rounded-full border border-tertiary px-8 py-3 text-sm font-black text-tertiary transition hover:bg-tertiary hover:text-[#1f2c22]"
           >
-            تصفح الأراضي
+            أعلن عن عقارك
           </Link>
         </div>
-      </div>
-
-      <div className="mt-20 mb-20 text-center">
-        <p className="text-[#f6f1df] text-lg mb-6 drop-shadow-md">هل تمتلك عقاراً أو أرضاً للبيع؟</p>
-        <Link
-          to={ROUTES.SELL}
-          className="inline-flex items-center justify-center gap-2 px-10 py-4 rounded-full border-2 border-[#c49a3a] text-[#c49a3a] font-bold hover:bg-[#c49a3a] hover:text-[#111b10] transition-colors shadow-lg"
-        >
-          أعلن عن عقارك
-        </Link>
-      </div>
+      </section>
     </main>
   );
 }

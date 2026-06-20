@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
+import { Building2, Bed, Bath, MapPin, Maximize2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { Building2, MapPin, Maximize2, Bed, Bath } from 'lucide-react';
 import { realEstateService } from '../../lib/api/real-estate-service';
 import { formatCurrency, realEstateTypeLabels } from '../../lib/formatters';
 import { ROUTES } from '../../lib/constants/routes';
@@ -12,92 +12,104 @@ export function PropertiesPage() {
       const response = await realEstateService.listRealEstateListings();
       return {
         ...response,
-        data: response.data.filter(listing => listing.type !== 'LAND')
+        data: response.data.filter((listing) => listing.type !== 'LAND'),
       };
     },
   });
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-surface p-8 flex items-center justify-center">
-        <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
-      </div>
+      <main className="min-h-[calc(100dvh-4rem)] bg-[#f7f2e8] px-4 py-12 sm:px-6 lg:px-8">
+        <div className="mx-auto flex min-h-[40vh] max-w-7xl items-center justify-center">
+          <div className="h-10 w-10 animate-spin rounded-full border-4 border-secondary border-t-transparent" />
+        </div>
+      </main>
     );
   }
 
   if (error) {
     return (
-      <div className="min-h-screen bg-surface p-8 flex flex-col items-center justify-center text-center">
-        <p className="text-error font-bold mb-4">عذراً، حدث خطأ أثناء تحميل العقارات.</p>
-      </div>
+      <main className="min-h-[calc(100dvh-4rem)] bg-[#f7f2e8] px-4 py-12 sm:px-6 lg:px-8">
+        <div className="mx-auto flex min-h-[40vh] max-w-3xl flex-col items-center justify-center text-center">
+          <p className="font-bold text-error">عذراً، حدث خطأ أثناء تحميل العقارات.</p>
+        </div>
+      </main>
     );
   }
 
   const listings = data?.data || [];
 
   return (
-    <main className="min-h-screen bg-surface py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-7xl mx-auto">
-        <div className="mb-12">
-          <h1 className="text-3xl font-black text-[#f6f1df] mb-4 drop-shadow-md">عقارات المنطقة</h1>
-          <p className="text-[#f6f1df] drop-shadow-sm">تصفح الشقق والوحدات السكنية المتاحة للبيع.</p>
-        </div>
+    <main className="min-h-[calc(100dvh-4rem)] bg-[#f7f2e8] px-4 py-12 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-7xl">
+        <header className="mx-auto max-w-3xl text-center">
+          <span className="inline-flex items-center gap-2 rounded-full border border-[#e4dac5] bg-white/75 px-4 py-2 text-sm font-bold text-tertiary shadow-sm backdrop-blur-md">
+            <Building2 className="h-4 w-4" />
+            عقارات المنطقة
+          </span>
+          <h1 className="mt-6 text-4xl font-black text-[#1f2c22] sm:text-5xl">عقارات المنطقة</h1>
+          <p className="mt-4 text-lg leading-9 text-[#5f6e62]">
+            تصفح الشقق والوحدات السكنية المتاحة للبيع داخل المنطقة.
+          </p>
+        </header>
 
         {listings.length === 0 ? (
-          <div className="text-center py-20 bg-white rounded-3xl border border-outline/10">
-            <Building2 className="w-16 h-16 text-outline mx-auto mb-4" />
-            <p className="text-on-surface-variant font-medium">لا توجد عقارات متاحة حالياً.</p>
+          <div className="glass-panel mt-12 rounded-[32px] p-10 text-center">
+            <Building2 className="mx-auto h-14 w-14 text-tertiary" />
+            <p className="mt-4 text-[#5f6e62]">لا توجد عقارات متاحة حالياً.</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="mt-12 grid gap-6 md:grid-cols-2 xl:grid-cols-3">
             {listings.map((listing) => (
               <Link
                 key={listing.id}
                 to={ROUTES.PROPERTY_DETAIL(listing.slug)}
-                className="bg-white rounded-3xl overflow-hidden shadow-sm border border-outline/10 hover:shadow-md transition-all group"
+                className="glass-card group overflow-hidden rounded-[32px] transition"
               >
-                <div className="relative aspect-[4/3] bg-surface-variant">
+                <div className="relative aspect-[4/3] bg-[#f3ede2]">
                   {listing.images && listing.images.length > 0 ? (
                     <img
                       src={listing.images[0].url}
                       alt={listing.title}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
                     />
                   ) : (
-                    <div className="w-full h-full flex items-center justify-center">
-                      <Building2 className="w-12 h-12 text-outline/30" />
+                    <div className="flex h-full w-full items-center justify-center">
+                      <Building2 className="h-12 w-12 text-[#d2c6ad]" />
                     </div>
                   )}
-                  <div className="absolute top-4 right-4 px-3 py-1 bg-white/90 backdrop-blur-sm rounded-full text-xs font-bold text-[#111b10] shadow-sm">
+                  <div className="absolute right-4 top-4 rounded-full bg-white/85 px-3 py-1 text-xs font-bold text-[#1f2c22] shadow-sm backdrop-blur-md">
                     {realEstateTypeLabels[listing.type]}
                   </div>
                 </div>
 
-                <div className="p-6">
-                  <h3 className="text-lg font-bold text-[#111b10] mb-2 line-clamp-1">{listing.title}</h3>
-                  <div className="text-2xl font-black text-[#0f4f3a] mb-4" dir="ltr">
-                    {formatCurrency(listing.price)}
+                <div className="space-y-4 p-6 text-right">
+                  <div>
+                    <h3 className="line-clamp-1 text-lg font-black text-[#1f2c22]">{listing.title}</h3>
+                    <div className="mt-2 text-2xl font-black text-secondary" dir="ltr">
+                      {formatCurrency(listing.price)}
+                    </div>
                   </div>
 
-                  <div className="grid grid-cols-3 gap-2 mb-6 border-t border-b border-outline/10 py-4">
-                    <div className="flex flex-col items-center gap-1 text-on-surface-variant">
-                      <Maximize2 className="w-4 h-4" />
+                  <div className="grid grid-cols-3 gap-2 border-y border-[#e4dac5] py-4 text-center">
+                    <div className="flex flex-col items-center gap-1 text-[#5f6e62]">
+                      <Maximize2 className="h-4 w-4" />
                       <span className="text-xs font-medium">{listing.areaSqm} م²</span>
                     </div>
-                    <div className="flex flex-col items-center gap-1 text-on-surface-variant">
-                      <Bed className="w-4 h-4" />
+                    <div className="flex flex-col items-center gap-1 text-[#5f6e62]">
+                      <Bed className="h-4 w-4" />
                       <span className="text-xs font-medium">{listing.bedrooms || '-'} غرف</span>
                     </div>
-                    <div className="flex flex-col items-center gap-1 text-on-surface-variant">
-                      <Bath className="w-4 h-4" />
+                    <div className="flex flex-col items-center gap-1 text-[#5f6e62]">
+                      <Bath className="h-4 w-4" />
                       <span className="text-xs font-medium">{listing.bathrooms || '-'} حمام</span>
                     </div>
                   </div>
 
                   <div className="flex items-center justify-between">
                     <span className="text-sm font-bold text-tertiary">عرض التفاصيل</span>
-                    <div className="w-8 h-8 rounded-full bg-surface-variant flex items-center justify-center group-hover:bg-primary group-hover:text-white transition-colors">
-                      <MapPin className="w-4 h-4" />
+                    <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[#f3ede2] text-[#1f2c22] transition-colors group-hover:bg-secondary group-hover:text-white">
+                      <MapPin className="h-4 w-4" />
                     </div>
                   </div>
                 </div>
