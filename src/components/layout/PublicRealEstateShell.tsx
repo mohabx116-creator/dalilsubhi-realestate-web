@@ -104,6 +104,14 @@ export function PublicRealEstateShell() {
                     جروب الفيس بوك
                   </a>
                 </li>
+                <li>
+                  <a
+                    href="https://dalilsubhi.com/publishing-policy"
+                    className="transition-colors hover:text-emerald-700"
+                  >
+                    سياسة النشر والإعلان
+                  </a>
+                </li>
               </ul>
             </div>
 

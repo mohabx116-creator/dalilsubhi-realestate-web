@@ -236,6 +236,10 @@ export function SellPage() {
             </p>
           </div>
 
+          <p className="text-sm text-[#5f6e62] text-center pt-2">
+            بإرسال الإعلان، فإنك تقر بالاطلاع على <a href="https://dalilsubhi.com/publishing-policy" target="_blank" rel="noopener noreferrer" className="text-emerald-700 underline underline-offset-4 hover:text-emerald-800 transition">سياسة النشر والإعلان</a> والالتزام بها.
+          </p>
+
           <button
             type="submit"
             disabled={loading}
