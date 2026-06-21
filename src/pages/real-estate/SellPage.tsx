@@ -23,13 +23,25 @@ export function SellPage() {
     bathrooms: '',
   });
 
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
   const submitMutation = useMutation({
     mutationFn: (data: any) => realEstateService.createRealEstateSubmission(data),
     onSuccess: () => {
       navigate(ROUTES.SUCCESS);
     },
     onError: (error: any) => {
-      alert('خطأ أثناء إرسال الطلب: ' + error.message);
+      let apiMessage = error.details?.message || error.message;
+      try {
+        if (apiMessage && apiMessage.startsWith('[')) {
+          const parsed = JSON.parse(apiMessage);
+          if (Array.isArray(parsed)) {
+            apiMessage = parsed.map((p: any) => p.message || p.path?.join('.')).join('، ');
+          }
+        }
+      } catch (e) {}
+
+      setErrorMessage(apiMessage ? `تأكد من صحة البيانات: ${apiMessage}` : 'حدث خطأ أثناء الإرسال. حاول مرة أخرى.');
       setLoading(false);
     },
   });
@@ -37,6 +49,7 @@ export function SellPage() {
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    setErrorMessage(null);
 
     const payload: any = {
       ...formData,
@@ -70,6 +83,11 @@ export function SellPage() {
         </div>
 
         <form onSubmit={handleSubmit} className="glass-panel space-y-8 rounded-[32px] p-6 shadow-xl sm:p-10">
+          {errorMessage && (
+            <div className="rounded-2xl border border-red-200 bg-red-50 p-4 text-sm font-semibold text-red-600">
+              {errorMessage}
+            </div>
+          )}
           <div className="space-y-6">
             <h2 className="border-b border-[#e4dac5] pb-4 text-xl font-bold text-[#1f2c22]">البيانات الشخصية</h2>
             <div className="grid grid-cols-1 gap-6 md:grid-cols-2">

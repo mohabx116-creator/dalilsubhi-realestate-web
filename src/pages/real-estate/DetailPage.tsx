@@ -1,6 +1,6 @@
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { useParams, Link } from 'react-router-dom';
-import { useState, type FormEvent, type ReactNode } from 'react';
+import { useState, type ReactNode } from 'react';
 import { CheckCircle2, ChevronRight, MapPin } from 'lucide-react';
 import { realEstateService } from '../../lib/api/real-estate-service';
 import { formatCurrency, realEstateTypeLabels, realEstateFinishingLabels } from '../../lib/formatters';
@@ -22,13 +22,26 @@ export function DetailPage() {
 
   const listing = data?.data;
 
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
   const inquiryMutation = useMutation({
     mutationFn: (payload: any) => realEstateService.createRealEstateInquiry(payload),
     onSuccess: () => {
       setSuccess(true);
+      setErrorMessage(null);
     },
-    onError: (e: any) => {
-      alert('حدث خطأ أثناء إرسال الطلب: ' + e.message);
+    onError: (error: any) => {
+      let apiMessage = error.details?.message || error.message;
+      try {
+        if (apiMessage && apiMessage.startsWith('[')) {
+          const parsed = JSON.parse(apiMessage);
+          if (Array.isArray(parsed)) {
+            apiMessage = parsed.map((p: any) => p.message || p.path?.join('.')).join('، ');
+          }
+        }
+      } catch (e) {}
+
+      setErrorMessage(apiMessage ? `تأكد من صحة البيانات: ${apiMessage}` : 'حدث خطأ أثناء الإرسال. حاول مرة أخرى.');
     },
   });
 
@@ -59,15 +72,7 @@ export function DetailPage() {
   const parentRoute = isLand ? ROUTES.LANDS : ROUTES.PROPERTIES;
   const parentLabel = isLand ? 'أراضي المنطقة' : 'عقارات المنطقة';
 
-  const handleSubmit = (e: FormEvent) => {
-    e.preventDefault();
-    inquiryMutation.mutate({
-      listingId: listing.id,
-      inquiryType,
-      customerName: name,
-      customerPhone: phone,
-    });
-  };
+
 
   return (
     <main className="min-h-[calc(100dvh-4rem)] bg-[#f7f2e8] pb-20">
@@ -159,7 +164,25 @@ export function DetailPage() {
                   </a>
                 </div>
               ) : (
-                <form onSubmit={handleSubmit} className="space-y-4">
+                <form
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    setErrorMessage(null);
+                    inquiryMutation.mutate({
+                      listingId: listing.id,
+                      customerName: name,
+                      customerPhone: phone,
+                      inquiryType,
+                    });
+                  }}
+                  className="mt-6 flex flex-col space-y-4"
+                >
+                  {errorMessage && (
+                    <div className="rounded-xl border border-red-200 bg-red-50 p-3 text-sm font-semibold text-red-600">
+                      {errorMessage}
+                    </div>
+                  )}
+
                   <div>
                     <label className="mb-2 block text-sm font-bold text-[#1f2c22]">نوع الطلب</label>
                     <select
