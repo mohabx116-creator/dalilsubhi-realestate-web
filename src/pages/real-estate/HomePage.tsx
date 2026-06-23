@@ -56,12 +56,26 @@ export function HomePage() {
 
         <div className="mt-14 text-center">
           <p className="text-lg font-semibold text-[#1f2c22]">هل تمتلك عقاراً أو أرضاً للبيع؟</p>
-          <a
-            href={OWNER_SUBMISSION_URL}
+          <Link
+            to={ROUTES.SELL}
             className="mt-6 inline-flex items-center justify-center rounded-full border border-tertiary px-8 py-3 text-sm font-black text-tertiary transition hover:bg-tertiary hover:text-[#1f2c22]"
           >
             أعلن عن عقارك
-          </a>
+          </Link>
+          <div className="mt-6 md:hidden">
+            <a
+              href={OWNER_SUBMISSION_URL}
+              className="mx-auto flex max-w-xl items-start gap-4 rounded-[28px] border border-[#d6b25e]/25 bg-white/90 px-5 py-5 text-right shadow-[0_18px_50px_rgba(7,22,20,0.08)] backdrop-blur-md transition hover:-translate-y-0.5 hover:shadow-[0_24px_60px_rgba(7,22,20,0.12)]"
+            >
+              <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-[#0fa37f] to-[#0c8a6b] text-white shadow-lg shadow-[#0fa37f]/20">
+                <Building2 className="h-5 w-5" />
+              </span>
+              <div className="min-w-0 flex-1">
+                <p className="text-lg font-black leading-7 text-[#071614]">عندك وحدة للإيجار؟ أعلن عنها</p>
+                <p className="mt-1 text-sm leading-6 text-gray-600">انشر وحدتك ضمن قسم الإيجارات</p>
+              </div>
+            </a>
+          </div>
         </div>
       </section>
     </main>
