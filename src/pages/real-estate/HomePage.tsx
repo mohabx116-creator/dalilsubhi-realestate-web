@@ -1,5 +1,6 @@
 import { Building2, Map } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { OWNER_SUBMISSION_URL } from '../../lib/constants/links';
 import { ROUTES } from '../../lib/constants/routes';
 
 export function HomePage() {
@@ -55,12 +56,12 @@ export function HomePage() {
 
         <div className="mt-14 text-center">
           <p className="text-lg font-semibold text-[#1f2c22]">هل تمتلك عقاراً أو أرضاً للبيع؟</p>
-          <Link
-            to={ROUTES.SELL}
+          <a
+            href={OWNER_SUBMISSION_URL}
             className="mt-6 inline-flex items-center justify-center rounded-full border border-tertiary px-8 py-3 text-sm font-black text-tertiary transition hover:bg-tertiary hover:text-[#1f2c22]"
           >
             أعلن عن عقارك
-          </Link>
+          </a>
         </div>
       </section>
     </main>

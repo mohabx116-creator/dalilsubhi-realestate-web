@@ -1,6 +1,7 @@
 import { Home, Megaphone } from 'lucide-react';
 import { Link, Outlet } from 'react-router-dom';
 import dalilSubhiLogo from '../../assets/dalil-subhi-logo.jpg';
+import { OWNER_SUBMISSION_URL } from '../../lib/constants/links';
 import { ROUTES } from '../../lib/constants/routes';
 
 export function PublicRealEstateShell() {
@@ -25,13 +26,13 @@ export function PublicRealEstateShell() {
             >
               دليل السبحي
             </a>
-            <Link
+            <a
               className="hidden items-center gap-2 rounded-full px-4 py-2 transition duration-200 hover:bg-[#f3ede2] hover:text-tertiary md:inline-flex"
-              to={ROUTES.SELL}
+              href={OWNER_SUBMISSION_URL}
             >
               <Megaphone className="h-4 w-4 text-tertiary" />
               أعلن عن عقارك
-            </Link>
+            </a>
             <Link
               className="inline-flex min-h-10 items-center gap-2 rounded-full bg-secondary px-5 py-2 text-white shadow-lg shadow-secondary/20 transition duration-200 hover:bg-secondary/90"
               to={ROUTES.PROPERTIES}
