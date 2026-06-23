@@ -5,6 +5,24 @@ import { realEstateService } from '../../lib/api/real-estate-service';
 import { formatCurrency, realEstateTypeLabels } from '../../lib/formatters';
 import { ROUTES } from '../../lib/constants/routes';
 
+function ListingSkeleton() {
+  return (
+    <div className="animate-pulse overflow-hidden rounded-[32px] bg-white/75 shadow-[0_16px_50px_rgba(28,45,34,0.08)]">
+      <div className="aspect-[16/11] bg-[#eee5d6]" />
+      <div className="space-y-4 p-6">
+        <div className="h-5 w-24 rounded-full bg-[#eee5d6]" />
+        <div className="h-6 w-3/4 rounded-full bg-[#eee5d6]" />
+        <div className="h-8 w-32 rounded-full bg-[#eee5d6]" />
+        <div className="grid grid-cols-3 gap-2">
+          <div className="h-14 rounded-2xl bg-[#eee5d6]" />
+          <div className="h-14 rounded-2xl bg-[#eee5d6]" />
+          <div className="h-14 rounded-2xl bg-[#eee5d6]" />
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export function LandsPage() {
   const { data, isLoading, error } = useQuery({
     queryKey: ['real-estate', 'listings', 'lands'],
@@ -14,8 +32,10 @@ export function LandsPage() {
   if (isLoading) {
     return (
       <main className="min-h-[calc(100dvh-4rem)] bg-[#f7f2e8] px-4 py-12 sm:px-6 lg:px-8">
-        <div className="mx-auto flex min-h-[40vh] max-w-7xl items-center justify-center">
-          <div className="h-10 w-10 animate-spin rounded-full border-4 border-secondary border-t-transparent" />
+        <div className="mx-auto grid min-h-[40vh] max-w-7xl gap-6 md:grid-cols-2 xl:grid-cols-3">
+          {Array.from({ length: 6 }).map((_, index) => (
+            <ListingSkeleton key={index} />
+          ))}
         </div>
       </main>
     );
@@ -41,8 +61,8 @@ export function LandsPage() {
             <Building2 className="h-4 w-4" />
             أراضي المنطقة
           </span>
-          <h1 className="mt-6 text-4xl font-black text-[#1f2c22] sm:text-5xl">أراضي المنطقة</h1>
-          <p className="mt-4 text-lg leading-9 text-[#5f6e62]">
+          <h1 className="mt-6 text-3xl font-black text-[#1f2c22] sm:text-5xl">أراضي المنطقة</h1>
+          <p className="mt-4 text-base leading-8 text-[#5f6e62] sm:text-lg sm:leading-9">
             استعرض الأراضي المتاحة للبيع داخل المنطقة وحولها.
           </p>
         </header>
@@ -50,7 +70,7 @@ export function LandsPage() {
         {listings.length === 0 ? (
           <div className="glass-panel mt-12 rounded-[32px] p-10 text-center">
             <Building2 className="mx-auto h-14 w-14 text-tertiary" />
-            <p className="mt-4 text-[#5f6e62]">لا توجد أراضي متاحة حالياً.</p>
+            <p className="mt-4 text-[#5f6e62]">لا توجد أراضٍ متاحة حالياً.</p>
           </div>
         ) : (
           <div className="mt-12 grid gap-6 md:grid-cols-2 xl:grid-cols-3">
@@ -60,7 +80,7 @@ export function LandsPage() {
                 to={ROUTES.LAND_DETAIL(listing.slug)}
                 className="glass-card group overflow-hidden rounded-[32px] transition hover:-translate-y-1"
               >
-                <div className="relative aspect-[4/3] bg-[#f3ede2]">
+                <div className="relative aspect-[16/11] bg-[#f3ede2]">
                   {listing.images && listing.images.length > 0 ? (
                     <img
                       src={listing.images[0].url}
@@ -77,7 +97,7 @@ export function LandsPage() {
                   </div>
                 </div>
 
-                <div className="space-y-4 p-6 text-right">
+                <div className="space-y-4 p-5 text-right sm:p-6">
                   <div>
                     <h3 className="line-clamp-1 text-lg font-black text-[#1f2c22]">{listing.title}</h3>
                     <div className="mt-2 text-2xl font-black text-secondary" dir="ltr">

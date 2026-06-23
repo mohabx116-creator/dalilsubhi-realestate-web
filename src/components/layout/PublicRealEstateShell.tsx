@@ -6,8 +6,8 @@ import { ROUTES } from '../../lib/constants/routes';
 export function PublicRealEstateShell() {
   return (
     <div className="min-h-dvh bg-[#f7f2e8] font-sans text-[#1f2c22]">
-      <header className="sticky top-0 z-40 border-b border-[#e4dac5] bg-white/80 shadow-[0_12px_40px_rgba(28,45,34,0.08)] backdrop-blur-xl">
-        <div className="mx-auto flex h-16 w-full max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
+      <header className="sticky top-0 z-40 border-b border-[#e4dac5] bg-white/85 shadow-[0_12px_40px_rgba(28,45,34,0.08)] backdrop-blur-xl">
+        <div className="mx-auto flex h-16 w-full max-w-7xl items-center justify-between gap-3 px-4 sm:px-6 lg:px-8">
           <Link className="flex items-center gap-3" to="/">
             <span className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-2xl border border-[#e4dac5] bg-white shadow-lg shadow-[0_10px_30px_rgba(28,45,34,0.08)]">
               <img src={dalilSubhiLogo} alt="دليل السبحي" className="h-full w-full object-contain mix-blend-multiply" />
@@ -20,7 +20,7 @@ export function PublicRealEstateShell() {
 
           <nav className="flex items-center gap-2 text-sm font-bold text-[#1f2c22]">
             <a
-              className="inline-flex min-h-10 items-center gap-2 rounded-full px-4 py-2 transition duration-200 hover:bg-[#f3ede2] hover:text-tertiary"
+              className="hidden min-h-10 items-center gap-2 rounded-full px-4 py-2 transition duration-200 hover:bg-[#f3ede2] hover:text-tertiary sm:inline-flex"
               href="https://dalilsubhi.com/"
             >
               دليل السبحي
@@ -124,7 +124,7 @@ export function PublicRealEstateShell() {
           </div>
 
           <div className="mt-8 border-t border-[#e4dac5] pt-6 text-center">
-            <p className="text-xs text-[#6d756a]">© 2026 عقارات دليل السبحي</p>
+            <p className="text-xs text-[#6d756a]">© 2026 مجمع الخدمات للمنطقة</p>
           </div>
         </div>
       </footer>
