@@ -85,8 +85,6 @@ export type RealEstateAmenity =
 
 export type RealEstatePhase = 'PHASE_ONE' | 'PHASE_TWO';
 
-export type RealEstateElectricityStatus = 'ELECTRICITY_METER' | 'ELECTRICITY_PRACTICE';
-
 export type RealEstateOwnershipProofType = 'CONTRACT' | 'POWER_OF_ATTORNEY';
 
 export type RealEstateInquiryType = 'CONTACT' | 'INSPECTION' | 'INTEREST';
@@ -145,7 +143,6 @@ export interface RealEstateListing {
   hasParking?: boolean;
   view?: string;
   phase?: RealEstatePhase;
-  electricityStatus?: RealEstateElectricityStatus;
   ownershipProofType?: RealEstateOwnershipProofType;
   areInstallmentsSettled?: boolean;
   isDepositSettled?: boolean;
@@ -203,7 +200,6 @@ export interface RealEstateOwnerSubmission {
   hasParking?: boolean;
   view?: string;
   phase?: RealEstatePhase;
-  electricityStatus?: RealEstateElectricityStatus;
   ownershipProofType?: RealEstateOwnershipProofType;
   areInstallmentsSettled?: boolean;
   isDepositSettled?: boolean;

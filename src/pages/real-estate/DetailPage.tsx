@@ -1,7 +1,6 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { useMutation, useQuery } from '@tanstack/react-query';
-import { useParams, Link, Navigate } from 'react-router-dom';
-import { type ReactNode } from 'react';
+import { Link, useParams } from 'react-router-dom';
 import { CheckCircle2, ChevronLeft, ChevronRight, Expand, MapPin, X } from 'lucide-react';
 import { realEstateService } from '../../lib/api/real-estate-service';
 import {
@@ -9,23 +8,22 @@ import {
   formatRealEstateFloor,
   formatRealEstateAmenity,
   normalizeRealEstateAmenities,
-  realEstateTypeLabels,
   realEstateFinishingLabels,
   realEstateFinishingStatusLabels,
   realEstatePhaseLabels,
-  realEstateElectricityStatusLabels,
   realEstateOwnershipProofTypeLabels,
 } from '../../lib/formatters';
 import { ROUTES } from '../../lib/constants/routes';
-import type { ImageDto, RealEstateInquiryType } from '../../lib/api/types';
-import { PUBLIC_LANDS_ENABLED } from '../../lib/constants/visibility';
+import type { ImageDto } from '../../lib/api/types';
 
 export function DetailPage() {
   const { slug } = useParams<{ slug: string }>();
-  const [inquiryType, setInquiryType] = useState<RealEstateInquiryType>('CONTACT');
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
   const [success, setSuccess] = useState(false);
+  const [whatsappUrl, setWhatsappUrl] = useState<string | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const whatsappWindowRef = useRef<Window | null>(null);
 
   const { data, isLoading, error } = useQuery({
     queryKey: ['real-estate', 'listing', slug],
@@ -35,16 +33,24 @@ export function DetailPage() {
 
   const listing = data?.data;
 
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
-
   const inquiryMutation = useMutation({
-    mutationFn: (payload: any) => realEstateService.createRealEstateInquiry(payload),
-    onSuccess: () => {
+    mutationFn: (payload: { listingId: string; customerName: string; customerPhone: string }) =>
+      realEstateService.createRealEstateInquiry(payload),
+    onSuccess: (response) => {
       setSuccess(true);
+      setWhatsappUrl(response.data.whatsappUrl ?? null);
       setErrorMessage(null);
+
+      if (whatsappWindowRef.current && response.data.whatsappUrl) {
+        whatsappWindowRef.current.location.href = response.data.whatsappUrl;
+        whatsappWindowRef.current.focus();
+      }
+
+      whatsappWindowRef.current = null;
     },
     onError: (error: any) => {
       let apiMessage = error.details?.message || error.message;
+
       try {
         if (apiMessage && apiMessage.startsWith('[')) {
           const parsed = JSON.parse(apiMessage);
@@ -52,7 +58,9 @@ export function DetailPage() {
             apiMessage = parsed.map((p: any) => p.message || p.path?.join('.')).join('، ');
           }
         }
-      } catch (e) {}
+      } catch {
+        // keep original text
+      }
 
       setErrorMessage(apiMessage ? `تأكد من صحة البيانات: ${apiMessage}` : 'حدث خطأ أثناء الإرسال. حاول مرة أخرى.');
     },
@@ -72,7 +80,7 @@ export function DetailPage() {
     return (
       <main className="min-h-[calc(100dvh-4rem)] bg-[#f7f2e8] px-4 py-12 sm:px-6 lg:px-8">
         <div className="mx-auto flex min-h-[40vh] max-w-3xl flex-col items-center justify-center text-center">
-          <p className="font-bold text-error">عذراً، لم نتمكن من العثور على العقار المطلوب.</p>
+          <p className="font-bold text-error">عذرًا، لم نتمكن من العثور على العقار المطلوب.</p>
           <Link to={ROUTES.PROPERTIES} className="mt-4 font-bold text-secondary hover:underline">
             العودة للقائمة
           </Link>
@@ -81,26 +89,18 @@ export function DetailPage() {
     );
   }
 
-  const isLand = listing.type === 'LAND';
-  if (isLand && !PUBLIC_LANDS_ENABLED) {
-    return <Navigate replace to={ROUTES.PROPERTIES} />;
-  }
-  const parentRoute = isLand ? ROUTES.LANDS : ROUTES.PROPERTIES;
-  const parentLabel = isLand ? 'أراضي المنطقة' : 'عقارات المنطقة';
   const images = listing.images ?? [];
-
-
 
   return (
     <main className="min-h-[calc(100dvh-4rem)] bg-[#f7f2e8] pb-20">
       <div className="border-b border-[#e4dac5] bg-white/75 backdrop-blur-md">
         <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
           <Link
-            to={parentRoute}
+            to={ROUTES.PROPERTIES}
             className="inline-flex items-center gap-2 rounded-full border border-[#e4dac5] bg-white px-4 py-2 text-sm font-bold text-[#1f2c22] shadow-sm transition hover:-translate-y-0.5"
           >
             <ChevronRight className="h-4 w-4" />
-            العودة إلى {parentLabel}
+            العودة إلى عقارات المنطقة
           </Link>
         </div>
       </div>
@@ -111,9 +111,6 @@ export function DetailPage() {
             <div className="glass-card overflow-hidden rounded-[32px]">
               <div className="relative aspect-video bg-[#f3ede2]">
                 <PropertyGallery images={images} title={listing.title} />
-                <div className="absolute right-4 top-4 rounded-full bg-white/90 px-3 py-1 text-sm font-bold text-secondary shadow-sm backdrop-blur-md">
-                  {realEstateTypeLabels[listing.type]}
-                </div>
               </div>
 
               <div className="space-y-6 p-6 sm:p-8">
@@ -132,20 +129,9 @@ export function DetailPage() {
 
                 <div className="grid grid-cols-2 gap-4 border-y border-[#e4dac5] py-6 md:grid-cols-4">
                   <DetailBox label="المساحة" value={`${listing.areaSqm} م²`} />
-                  {!isLand && (
-                    <>
-                      <DetailBox label="عدد الغرف" value={listing.bedrooms?.toString() || '-'} />
-                      <DetailBox label="عدد الحمامات" value={listing.bathrooms?.toString() || '-'} />
-                      <DetailBox label="التشطيب" value={listing.finishingType ? realEstateFinishingLabels[listing.finishingType] : '-'} />
-                    </>
-                  )}
-                  {isLand && (
-                    <>
-                      <DetailBox label="سعر المتر" value={listing.pricePerMeter ? formatCurrency(listing.pricePerMeter) : '-'} />
-                      <DetailBox label="الواجهة" value={listing.frontage ? `${listing.frontage} م` : '-'} />
-                      <DetailBox label="الاستخدام" value={listing.landUse || '-'} />
-                    </>
-                  )}
+                  <DetailBox label="عدد الغرف" value={listing.bedrooms?.toString() || '-'} />
+                  <DetailBox label="عدد الحمامات" value={listing.bathrooms?.toString() || '-'} />
+                  <DetailBox label="التشطيب" value={listing.finishingType ? realEstateFinishingLabels[listing.finishingType] : '-'} />
                 </div>
 
                 <div>
@@ -155,7 +141,7 @@ export function DetailPage() {
 
                 {(() => {
                   const amenities = normalizeRealEstateAmenities(listing.amenities);
-                  return listing.finishingStatus || listing.finishingType || listing.floor || listing.phase || listing.electricityStatus || listing.ownershipProofType || amenities.length || listing.areInstallmentsSettled !== undefined || listing.isDepositSettled !== undefined || listing.hasFinalContract !== undefined;
+                  return listing.finishingStatus || listing.finishingType || listing.floor || listing.phase || listing.ownershipProofType || amenities.length || listing.areInstallmentsSettled !== undefined || listing.isDepositSettled !== undefined || listing.hasFinalContract !== undefined;
                 })() && (
                   <div className="rounded-[28px] border border-[#e4dac5] bg-[#fcfaf6] p-5 sm:p-6">
                     <h3 className="mb-4 text-lg font-bold text-[#1f2c22]">مواصفات العقار</h3>
@@ -172,7 +158,6 @@ export function DetailPage() {
                       />
                       <DetailBox label="الدور" value={formatRealEstateFloor(listing.floor)} />
                       <DetailBox label="المرحلة" value={listing.phase ? realEstatePhaseLabels[listing.phase] : '-'} />
-                      <DetailBox label="حالة الكهرباء" value={listing.electricityStatus ? realEstateElectricityStatusLabels[listing.electricityStatus] : '-'} />
                       <DetailBox label="نوع إثبات الملكية" value={listing.ownershipProofType ? realEstateOwnershipProofTypeLabels[listing.ownershipProofType] : '-'} />
                       <DetailBox label="الأقساط خالصة؟" value={listing.areInstallmentsSettled === undefined ? '-' : (listing.areInstallmentsSettled ? 'نعم' : 'لا')} />
                       <DetailBox label="الوديعة خالصة؟" value={listing.isDepositSettled === undefined ? '-' : (listing.isDepositSettled ? 'نعم' : 'لا')} />
@@ -199,34 +184,38 @@ export function DetailPage() {
 
           <div className="lg:col-span-1">
             <div className="glass-panel sticky top-24 rounded-[28px] p-6">
-              <h3 className="mb-6 text-xl font-bold text-[#1f2c22]">الاهتمام بالعقار</h3>
+              <h3 className="mb-6 text-xl font-bold text-[#1f2c22]">إرسال طلب العرض</h3>
 
               {success ? (
                 <div className="rounded-3xl border border-[#bfe6d8] bg-[#eefaf4] p-6 text-center">
                   <CheckCircle2 className="mx-auto mb-4 h-16 w-16 text-secondary" />
                   <h4 className="mb-2 text-lg font-bold text-[#1f2c22]">تم استلام طلبك بنجاح</h4>
                   <p className="mb-6 text-sm leading-7 text-[#5f6e62]">
-                    سيتم التواصل معك من قبل فريق المبيعات في أقرب وقت.
+                    سيتم مراجعة بيانات الطلب ثم فتح واتساب لإكمال التواصل معك.
                   </p>
-                  <a
-                    href="https://chat.whatsapp.com/ECEZfbsvjlU43eDvKa9XUu"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-secondary px-6 py-3 font-bold text-white shadow-lg shadow-secondary/20 transition hover:-translate-y-0.5 hover:bg-secondary/90"
-                  >
-                    تواصل معنا عبر واتساب الآن
-                  </a>
+                  {whatsappUrl ? (
+                    <a
+                      href={whatsappUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-secondary px-6 py-3 font-bold text-white shadow-lg shadow-secondary/20 transition hover:-translate-y-0.5 hover:bg-secondary/90"
+                    >
+                      فتح واتساب لإكمال الطلب
+                    </a>
+                  ) : (
+                    <p className="text-sm font-semibold text-[#5f6e62]">إذا لم يفتح واتساب تلقائيًا، فحاول مرة أخرى من زر الإرسال.</p>
+                  )}
                 </div>
               ) : (
                 <form
                   onSubmit={(e) => {
                     e.preventDefault();
                     setErrorMessage(null);
+                    whatsappWindowRef.current = window.open('', '_blank', 'noopener,noreferrer');
                     inquiryMutation.mutate({
                       listingId: listing.id,
                       customerName: name,
                       customerPhone: phone,
-                      inquiryType,
                     });
                   }}
                   className="mt-6 flex flex-col space-y-4"
@@ -236,19 +225,6 @@ export function DetailPage() {
                       {errorMessage}
                     </div>
                   )}
-
-                  <div>
-                    <label className="mb-2 block text-sm font-bold text-[#1f2c22]">نوع الطلب</label>
-                    <select
-                      value={inquiryType}
-                      onChange={(e) => setInquiryType(e.target.value as RealEstateInquiryType)}
-                      className="w-full rounded-xl border border-[#e4dac5] bg-white px-4 py-3 text-[#1f2c22] focus:border-secondary focus:outline-none focus:ring-2 focus:ring-secondary/20"
-                    >
-                      <option value="CONTACT">استفسار عام</option>
-                      <option value="INSPECTION">طلب معاينة</option>
-                      <option value="INTEREST">إبداء اهتمام بالشراء</option>
-                    </select>
-                  </div>
 
                   <div>
                     <label className="mb-2 block text-sm font-bold text-[#1f2c22]">الاسم بالكامل</label>
@@ -280,11 +256,11 @@ export function DetailPage() {
                     disabled={inquiryMutation.isPending}
                     className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-secondary px-6 py-4 font-bold text-white shadow-lg shadow-secondary/20 transition hover:-translate-y-0.5 hover:bg-secondary/90 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0"
                   >
-                    {inquiryMutation.isPending ? 'جاري الإرسال...' : 'إرسال الطلب'}
+                    {inquiryMutation.isPending ? 'جاري الإرسال...' : 'إرسال طلب العرض'}
                   </button>
 
                   <p className="mt-4 text-center text-xs leading-6 text-[#5f6e62]">
-                    بإرسال الطلب، سيقوم فريقنا بمراجعة البيانات والتواصل معك لترتيب المعاينة.
+                    بإرسال الطلب، سيقوم فريقنا بمراجعة البيانات والتواصل معك لتنسيق المعاينة.
                   </p>
                 </form>
               )}
@@ -355,9 +331,7 @@ function PropertyGallery({ images, title }: { images: ImageDto[]; title: string 
   }
 
   if (images.length === 0) {
-    return (
-      <div className="flex h-full w-full items-center justify-center text-[#8c7f67]">بدون صورة</div>
-    );
+    return <div className="flex h-full w-full items-center justify-center text-[#8c7f67]">بدون صورة</div>;
   }
 
   if (!hasMultiple) {
@@ -515,7 +489,9 @@ function Lightbox({
         onClick={(event) => event.stopPropagation()}
       >
         <div className="flex items-center justify-between border-b border-white/10 px-4 py-3 text-white">
-          <span className="text-sm font-semibold">{activeIndex + 1} / {images.length}</span>
+          <span className="text-sm font-semibold">
+            {activeIndex + 1} / {images.length}
+          </span>
           <button
             type="button"
             onClick={onClose}

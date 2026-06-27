@@ -4,9 +4,7 @@ import type {
   RealEstateFinishing,
   RealEstateFinishingStatus,
   RealEstateFloor,
-  RealEstateAmenity,
   RealEstatePhase,
-  RealEstateElectricityStatus,
   RealEstateOwnershipProofType,
   RealEstateInquiryType,
   RealEstateInquiryStatus,
@@ -100,67 +98,59 @@ export const realEstateFloorLabels: Record<RealEstateFloor, string> = {
   ROOF: 'روف',
 };
 
-const realEstateAmenityLabelMap: Record<string, string> = {
-  ELEVATOR: 'مصعد',
-  GARAGE: 'جراج',
-  SECURITY: 'أمن وحراسة',
+type SupportedRealEstateAmenity =
+  | 'SURVEILLANCE_CAMERAS'
+  | 'NATURAL_GAS'
+  | 'WATER_METER'
+  | 'GAS_METER'
+  | 'AIR_CONDITIONERS'
+  | 'ELECTRICAL_APPLIANCES';
+
+const realEstateAmenityLabelMap: Record<SupportedRealEstateAmenity, string> = {
   SURVEILLANCE_CAMERAS: 'كاميرات مراقبة',
-  INTERCOM: 'إنتركم',
   NATURAL_GAS: 'غاز طبيعي',
   WATER_METER: 'عداد مياه',
   GAS_METER: 'عداد غاز',
   AIR_CONDITIONERS: 'تكييفات',
-  KITCHEN: 'مطبخ',
   ELECTRICAL_APPLIANCES: 'أجهزة كهربائية',
-  BALCONY_OR_TERRACE: 'بلكونة أو تراس',
-  LAND_SHARE: 'حصة بالأرض',
-  AIR_CONDITIONS: 'تكييفات',
 };
 
-export const realEstateAmenityLabels: Record<RealEstateAmenity, string> = {
-  ELEVATOR: realEstateAmenityLabelMap.ELEVATOR,
-  GARAGE: realEstateAmenityLabelMap.GARAGE,
-  SECURITY: realEstateAmenityLabelMap.SECURITY,
+export const realEstateAmenityLabels: Record<SupportedRealEstateAmenity, string> = {
   SURVEILLANCE_CAMERAS: realEstateAmenityLabelMap.SURVEILLANCE_CAMERAS,
-  INTERCOM: realEstateAmenityLabelMap.INTERCOM,
   NATURAL_GAS: realEstateAmenityLabelMap.NATURAL_GAS,
   WATER_METER: realEstateAmenityLabelMap.WATER_METER,
   GAS_METER: realEstateAmenityLabelMap.GAS_METER,
   AIR_CONDITIONERS: realEstateAmenityLabelMap.AIR_CONDITIONERS,
-  KITCHEN: realEstateAmenityLabelMap.KITCHEN,
   ELECTRICAL_APPLIANCES: realEstateAmenityLabelMap.ELECTRICAL_APPLIANCES,
-  BALCONY_OR_TERRACE: realEstateAmenityLabelMap.BALCONY_OR_TERRACE,
-  LAND_SHARE: realEstateAmenityLabelMap.LAND_SHARE,
 };
 
 export function normalizeRealEstateAmenity(value?: string | null) {
   if (!value) return null;
-  return value === 'AIR_CONDITIONS' ? 'AIR_CONDITIONERS' : value;
+  const normalized = value === 'AIR_CONDITIONS' ? 'AIR_CONDITIONERS' : value;
+
+  return Object.prototype.hasOwnProperty.call(realEstateAmenityLabelMap, normalized)
+    ? (normalized as SupportedRealEstateAmenity)
+    : null;
 }
 
 export function formatRealEstateAmenity(value?: string | null) {
   const normalized = normalizeRealEstateAmenity(value);
   if (!normalized) return 'غير متاح';
-  return realEstateAmenityLabelMap[normalized] ?? normalized;
+  return realEstateAmenityLabelMap[normalized] ?? 'غير متاح';
 }
 
 export function normalizeRealEstateAmenities(values?: Array<string | null | undefined>) {
-  const unique = new Set<string>();
+  const unique = new Set<SupportedRealEstateAmenity>();
   (values ?? []).forEach((value) => {
     const normalized = normalizeRealEstateAmenity(value);
     if (normalized) unique.add(normalized);
   });
-  return Array.from(unique) as RealEstateAmenity[];
+  return Array.from(unique);
 }
 
 export const realEstatePhaseLabels: Record<RealEstatePhase, string> = {
   PHASE_ONE: 'المرحلة الأولى',
   PHASE_TWO: 'المرحلة الثانية',
-};
-
-export const realEstateElectricityStatusLabels: Record<RealEstateElectricityStatus, string> = {
-  ELECTRICITY_METER: 'عداد كهرباء',
-  ELECTRICITY_PRACTICE: 'ممارسة',
 };
 
 export const realEstateOwnershipProofTypeLabels: Record<RealEstateOwnershipProofType, string> = {

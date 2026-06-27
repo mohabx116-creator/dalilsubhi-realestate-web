@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Building2, Bed, Bath, MapPin, Maximize2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { realEstateService } from '../../lib/api/real-estate-service';
-import { formatCurrency, realEstateTypeLabels } from '../../lib/formatters';
+import { formatCurrency } from '../../lib/formatters';
 import { ROUTES } from '../../lib/constants/routes';
 
 function ListingSkeleton() {
@@ -27,11 +27,7 @@ export function PropertiesPage() {
   const { data, isLoading, error } = useQuery({
     queryKey: ['real-estate', 'listings', 'properties'],
     queryFn: async () => {
-      const response = await realEstateService.listRealEstateListings();
-      return {
-        ...response,
-        data: response.data.filter((listing) => listing.type !== 'LAND'),
-      };
+      return await realEstateService.listRealEstateListings();
     },
   });
 
@@ -98,9 +94,6 @@ export function PropertiesPage() {
                       <Building2 className="h-10 w-10 text-neutral-400" />
                     </div>
                   )}
-                  <div className="absolute right-3 top-3 rounded-full bg-[#12221b]/80 px-2.5 py-1 text-[10px] font-bold text-white shadow-sm backdrop-blur-md">
-                    {realEstateTypeLabels[listing.type]}
-                  </div>
                   {((listing.images?.length ?? 0) > 1) && (
                     <div className="absolute bottom-3 left-3 rounded-full bg-white/90 px-2.5 py-1 text-[10px] font-bold text-[#12221b] shadow-sm backdrop-blur-md">
                       {listing.images?.length} صور

@@ -34,6 +34,10 @@ export const realEstateService = {
 
   // --- Inquiries ---
   createRealEstateInquiry: async (payload: Partial<RealEstateInquiry>) => {
-    return await postApiData<RealEstateInquiry>(`${BASE_URL}/inquiries`, payload);
+    return await postApiData<{
+      id: string;
+      status: RealEstateInquiry['status'];
+      whatsappUrl?: string | null;
+    }>(`${BASE_URL}/inquiries`, payload);
   },
 };
