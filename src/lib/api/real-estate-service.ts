@@ -7,6 +7,12 @@ import type {
 
 const BASE_URL = '/real-estate';
 
+export interface RealEstateUploadSignature {
+  uploadUrl: string;
+  fields: Record<string, string | number | boolean>;
+  cloudName: string;
+}
+
 export const realEstateService = {
   // --- Listings ---
   listRealEstateListings: async (params?: Record<string, any>) => {
@@ -30,6 +36,13 @@ export const realEstateService = {
   // --- Submissions ---
   createRealEstateSubmission: async (payload: Partial<RealEstateOwnerSubmission>) => {
     return await postApiData<RealEstateOwnerSubmission>(`${BASE_URL}/owner-submissions`, payload);
+  },
+
+  createRealEstateUploadSignature: async (folder?: string) => {
+    const response = await postApiData<RealEstateUploadSignature>(`${BASE_URL}/owner-submissions/upload-signature`, {
+      ...(folder ? { folder } : {}),
+    });
+    return response.data;
   },
 
   // --- Inquiries ---

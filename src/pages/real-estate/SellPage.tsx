@@ -1,7 +1,7 @@
 import { useMutation } from '@tanstack/react-query';
 import { Megaphone } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { useState, type FormEvent } from 'react';
+import { useRef, useState, type ChangeEvent, type FormEvent } from 'react';
 import { realEstateService } from '../../lib/api/real-estate-service';
 import { ROUTES } from '../../lib/constants/routes';
 import {
@@ -47,6 +47,30 @@ const yesNoOptions = [
   { value: 'false', label: 'لا' },
 ];
 
+type UploadedImage = {
+  id: string;
+  url: string;
+  publicId?: string;
+  alt?: string;
+  isCover: boolean;
+  sortOrder: number;
+};
+
+const MAX_IMAGES = 12;
+const MAX_IMAGE_SIZE = 5 * 1024 * 1024;
+const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
+
+function normalizeUploadedImages(images: UploadedImage[]) {
+  const coverIndex = images.findIndex((image) => image.isCover);
+  const normalizedCoverIndex = coverIndex === -1 ? 0 : coverIndex;
+
+  return images.map((image, index) => ({
+    ...image,
+    sortOrder: index,
+    isCover: index === normalizedCoverIndex,
+  }));
+}
+
 export function SellPage() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
@@ -72,6 +96,109 @@ export function SellPage() {
     isDepositSettled: '',
     hasFinalContract: '',
   });
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const [images, setImages] = useState<UploadedImage[]>([]);
+  const [isUploadingImages, setIsUploadingImages] = useState(false);
+  const [imagesError, setImagesError] = useState<string | null>(null);
+
+  const updateImages = (updater: (current: UploadedImage[]) => UploadedImage[]) => {
+    setImages((current) => normalizeUploadedImages(updater(current)));
+  };
+
+  const setCoverImage = (imageId: string) => {
+    updateImages((current) =>
+      current.map((image) => ({
+        ...image,
+        isCover: image.id === imageId,
+      })),
+    );
+  };
+
+  const removeImage = (imageId: string) => {
+    updateImages((current) => {
+      const remaining = current.filter((image) => image.id !== imageId);
+      return remaining.length > 0
+        ? remaining
+        : [];
+    });
+  };
+
+  const uploadSingleImage = async (file: File, sortOrder: number, isCover: boolean) => {
+    const signature = await realEstateService.createRealEstateUploadSignature();
+    const formData = new FormData();
+
+    Object.entries(signature.fields).forEach(([key, value]) => {
+      formData.append(key, String(value));
+    });
+    formData.append('file', file);
+
+    const response = await fetch(signature.uploadUrl, {
+      method: 'POST',
+      body: formData,
+    });
+
+    if (!response.ok) {
+      throw new Error('Cloudinary upload failed');
+    }
+
+    const result = await response.json();
+
+    return {
+      id: globalThis.crypto?.randomUUID?.() ?? `${Date.now()}-${Math.random().toString(16).slice(2)}`,
+      url: result.secure_url as string,
+      publicId: result.public_id as string | undefined,
+      alt: file.name,
+      isCover,
+      sortOrder,
+    } satisfies UploadedImage;
+  };
+
+  const handleImageSelection = async (event: ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(event.target.files ?? []);
+    event.target.value = '';
+
+    if (files.length === 0) {
+      return;
+    }
+
+    const invalidType = files.find((file) => !ALLOWED_IMAGE_TYPES.includes(file.type));
+    if (invalidType) {
+      setImagesError('صيغة الصورة غير مدعومة. استخدم JPEG أو PNG أو WEBP.');
+      return;
+    }
+
+    const oversized = files.find((file) => file.size > MAX_IMAGE_SIZE);
+    if (oversized) {
+      setImagesError('كل صورة يجب أن تكون بحجم 5 ميجابايت أو أقل.');
+      return;
+    }
+
+    if (images.length + files.length > MAX_IMAGES) {
+      setImagesError('يمكنك رفع حتى 12 صورة فقط.');
+      return;
+    }
+
+    setImagesError(null);
+    setIsUploadingImages(true);
+
+    try {
+      const nextImages: UploadedImage[] = [];
+      for (const [index, file] of files.entries()) {
+        const uploaded = await uploadSingleImage(
+          file,
+          images.length + index,
+          images.length === 0 && index === 0,
+        );
+        nextImages.push(uploaded);
+      }
+
+      setImages((current) => normalizeUploadedImages([...current, ...nextImages]));
+    } catch {
+      setImagesError('تعذر رفع الصور الآن. حاول مرة أخرى.');
+    } finally {
+      setIsUploadingImages(false);
+    }
+  };
 
   const submitMutation = useMutation({
     mutationFn: (data: any) => realEstateService.createRealEstateSubmission(data),
@@ -98,6 +225,11 @@ export function SellPage() {
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
+    if (isUploadingImages) {
+      setErrorMessage('يرجى انتظار انتهاء رفع الصور قبل الإرسال.');
+      return;
+    }
+
     setLoading(true);
     setErrorMessage(null);
 
@@ -121,6 +253,15 @@ export function SellPage() {
       areInstallmentsSettled: formData.areInstallmentsSettled === '' ? undefined : formData.areInstallmentsSettled === 'true',
       isDepositSettled: formData.isDepositSettled === '' ? undefined : formData.isDepositSettled === 'true',
       hasFinalContract: formData.hasFinalContract === '' ? undefined : formData.hasFinalContract === 'true',
+      images: images.length
+        ? images.map((image) => ({
+            url: image.url,
+            publicId: image.publicId,
+            alt: image.alt,
+            isCover: image.isCover,
+            sortOrder: image.sortOrder,
+          }))
+        : undefined,
     };
 
     submitMutation.mutate(payload);
@@ -285,6 +426,80 @@ export function SellPage() {
                 />
               </div>
             </div>
+          </div>
+
+          <div className="space-y-6">
+            <h2 className="border-b border-[#e4dac5] pb-4 text-xl font-bold text-[#1f2c22]">رفع الصور</h2>
+            <div className="rounded-2xl border border-dashed border-[#d4c8b0] bg-white/80 p-5">
+              <label className="flex cursor-pointer flex-col items-center justify-center gap-3 rounded-2xl border border-[#e4dac5] bg-[#faf6ef] px-6 py-8 text-center transition hover:border-secondary hover:bg-white">
+                <span className="text-base font-bold text-[#1f2c22]">اختيار صور العقار</span>
+                <span className="text-sm leading-7 text-[#5f6e62]">
+                  الحد الأقصى 12 صورة. كل صورة حتى 5 ميجابايت. JPEG أو PNG أو WEBP فقط.
+                </span>
+                <span className="rounded-full bg-secondary px-4 py-2 text-sm font-bold text-white">
+                  {isUploadingImages ? 'جاري الرفع...' : 'اختر الصور'}
+                </span>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  multiple
+                  accept="image/jpeg,image/png,image/webp"
+                  onChange={handleImageSelection}
+                  className="hidden"
+                  disabled={isUploadingImages}
+                />
+              </label>
+
+              {imagesError && (
+                <p className="mt-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-600">
+                  {imagesError}
+                </p>
+              )}
+
+              {images.length > 0 && (
+                <div className="mt-5 grid gap-4 sm:grid-cols-2">
+                  {images.map((image, index) => (
+                    <div key={image.id} className="overflow-hidden rounded-2xl border border-[#e4dac5] bg-white">
+                      <div className="relative aspect-[4/3] bg-[#f8f3ea]">
+                        <img src={image.url} alt={image.alt || `صورة ${index + 1}`} className="h-full w-full object-cover" />
+                        {image.isCover && (
+                          <span className="absolute left-3 top-3 rounded-full bg-secondary px-3 py-1 text-xs font-bold text-white">
+                            غلاف
+                          </span>
+                        )}
+                      </div>
+                      <div className="space-y-3 p-4">
+                        <div className="flex items-center justify-between gap-3">
+                          <label className="flex items-center gap-2 text-sm font-semibold text-[#1f2c22]">
+                            <input
+                              type="radio"
+                              name="cover-image"
+                              checked={image.isCover}
+                              onChange={() => setCoverImage(image.id)}
+                              className="h-4 w-4"
+                            />
+                            صورة الغلاف
+                          </label>
+                          <button
+                            type="button"
+                            onClick={() => removeImage(image.id)}
+                            className="text-sm font-bold text-red-600 transition hover:text-red-700"
+                          >
+                            إزالة
+                          </button>
+                        </div>
+                        <p className="text-xs text-[#5f6e62]">ترتيب العرض: {index + 1}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              <p className="mt-4 text-sm leading-7 text-[#5f6e62]">
+                يمكنك إعادة رفع الصور أو تغيير صورة الغلاف قبل إرسال الطلب. بعد المراجعة ستظهر الصور مع الإعلان عند الموافقة.
+              </p>
+            </div>
+
           </div>
 
           <div className="space-y-6">
@@ -466,7 +681,7 @@ export function SellPage() {
 
           <button
             type="submit"
-            disabled={loading}
+            disabled={loading || isUploadingImages}
             className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-secondary px-8 py-4 font-bold text-white shadow-lg shadow-secondary/20 transition-all hover:-translate-y-1 hover:bg-secondary/90 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0"
           >
             {loading ? 'جاري الإرسال...' : 'إرسال طلب العرض'}
