@@ -15,9 +15,6 @@ export function HomePage() {
           <h1 className="mt-5 text-3xl font-black leading-tight text-[#12221b] sm:text-5xl">
             عقارات المنطقة
           </h1>
-          <p className="mx-auto mt-4 max-w-2xl text-sm leading-7 text-[#506053] sm:text-base sm:leading-8">
-            بوابة مخصصة لعرض عقارات المنطقة للبيع بطريقة واضحة وآمنة ومريحة للعين.
-          </p>
         </div>
 
         <div className="mx-auto mt-12 grid max-w-2xl gap-6">
