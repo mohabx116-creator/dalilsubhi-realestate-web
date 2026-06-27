@@ -109,12 +109,12 @@ const realEstateAmenityLabelMap: Record<string, string> = {
   NATURAL_GAS: 'غاز طبيعي',
   WATER_METER: 'عداد مياه',
   GAS_METER: 'عداد غاز',
-  AIR_CONDITIONERS: 'تكيفات',
+  AIR_CONDITIONERS: 'تكييفات',
   KITCHEN: 'مطبخ',
   ELECTRICAL_APPLIANCES: 'أجهزة كهربائية',
   BALCONY_OR_TERRACE: 'بلكونة أو تراس',
   LAND_SHARE: 'حصة بالأرض',
-  AIR_CONDITIONS: 'تكيفات',
+  AIR_CONDITIONS: 'تكييفات',
 };
 
 export const realEstateAmenityLabels: Record<RealEstateAmenity, string> = {
