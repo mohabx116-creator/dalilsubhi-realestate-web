@@ -155,7 +155,7 @@ export function DetailPage() {
 
                 {(() => {
                   const amenities = normalizeRealEstateAmenities(listing.amenities);
-                  return listing.finishingStatus || listing.finishingType || listing.floor || listing.phase || listing.electricityStatus || listing.ownershipProofType || amenities.length || listing.hasInstallments !== undefined || listing.hasDeposit !== undefined || listing.hasFinalContract !== undefined;
+                  return listing.finishingStatus || listing.finishingType || listing.floor || listing.phase || listing.electricityStatus || listing.ownershipProofType || amenities.length || listing.areInstallmentsSettled !== undefined || listing.isDepositSettled !== undefined || listing.hasFinalContract !== undefined;
                 })() && (
                   <div className="rounded-[28px] border border-[#e4dac5] bg-[#fcfaf6] p-5 sm:p-6">
                     <h3 className="mb-4 text-lg font-bold text-[#1f2c22]">مواصفات العقار</h3>
@@ -174,8 +174,8 @@ export function DetailPage() {
                       <DetailBox label="المرحلة" value={listing.phase ? realEstatePhaseLabels[listing.phase] : '-'} />
                       <DetailBox label="حالة الكهرباء" value={listing.electricityStatus ? realEstateElectricityStatusLabels[listing.electricityStatus] : '-'} />
                       <DetailBox label="نوع إثبات الملكية" value={listing.ownershipProofType ? realEstateOwnershipProofTypeLabels[listing.ownershipProofType] : '-'} />
-                      <DetailBox label="الأقساط خالصة؟" value={listing.hasInstallments === undefined ? '-' : (listing.hasInstallments ? 'نعم' : 'لا')} />
-                      <DetailBox label="الوديعة خالصة؟" value={listing.hasDeposit === undefined ? '-' : (listing.hasDeposit ? 'نعم' : 'لا')} />
+                      <DetailBox label="الأقساط خالصة؟" value={listing.areInstallmentsSettled === undefined ? '-' : (listing.areInstallmentsSettled ? 'نعم' : 'لا')} />
+                      <DetailBox label="الوديعة خالصة؟" value={listing.isDepositSettled === undefined ? '-' : (listing.isDepositSettled ? 'نعم' : 'لا')} />
                       <DetailBox label="يوجد عقد نهائي؟" value={listing.hasFinalContract === undefined ? '-' : (listing.hasFinalContract ? 'نعم' : 'لا')} />
                     </div>
 

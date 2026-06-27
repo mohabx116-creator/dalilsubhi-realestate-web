@@ -93,8 +93,8 @@ export function SellPage() {
     phase: '',
     electricityStatus: '',
     ownershipProofType: '',
-    hasInstallments: '',
-    hasDeposit: '',
+    areInstallmentsSettled: '',
+    isDepositSettled: '',
     hasFinalContract: '',
   });
 
@@ -139,8 +139,8 @@ export function SellPage() {
       phase: formData.phase || undefined,
       electricityStatus: formData.electricityStatus || undefined,
       ownershipProofType: formData.ownershipProofType || undefined,
-      hasInstallments: formData.hasInstallments === '' ? undefined : formData.hasInstallments === 'true',
-      hasDeposit: formData.hasDeposit === '' ? undefined : formData.hasDeposit === 'true',
+      areInstallmentsSettled: formData.areInstallmentsSettled === '' ? undefined : formData.areInstallmentsSettled === 'true',
+      isDepositSettled: formData.isDepositSettled === '' ? undefined : formData.isDepositSettled === 'true',
       hasFinalContract: formData.hasFinalContract === '' ? undefined : formData.hasFinalContract === 'true',
     };
 
@@ -154,8 +154,8 @@ export function SellPage() {
       delete payload.phase;
       delete payload.electricityStatus;
       delete payload.ownershipProofType;
-      delete payload.hasInstallments;
-      delete payload.hasDeposit;
+      delete payload.areInstallmentsSettled;
+      delete payload.isDepositSettled;
       delete payload.hasFinalContract;
     }
 
@@ -476,8 +476,8 @@ export function SellPage() {
                   <div>
                     <label className="mb-2 block text-sm font-bold text-[#1f2c22]">الأقساط خالصة؟</label>
                     <select
-                      value={formData.hasInstallments}
-                      onChange={(e) => setFormData({ ...formData, hasInstallments: e.target.value })}
+                      value={formData.areInstallmentsSettled}
+                      onChange={(e) => setFormData({ ...formData, areInstallmentsSettled: e.target.value })}
                       className="w-full rounded-xl border border-[#e4dac5] bg-white px-4 py-3 text-[#1f2c22] focus:border-secondary focus:outline-none focus:ring-2 focus:ring-secondary/20 transition-all"
                     >
                       {yesNoOptions.map((option) => (
@@ -490,8 +490,8 @@ export function SellPage() {
                   <div>
                     <label className="mb-2 block text-sm font-bold text-[#1f2c22]">الوديعة خالصة؟</label>
                     <select
-                      value={formData.hasDeposit}
-                      onChange={(e) => setFormData({ ...formData, hasDeposit: e.target.value })}
+                      value={formData.isDepositSettled}
+                      onChange={(e) => setFormData({ ...formData, isDepositSettled: e.target.value })}
                       className="w-full rounded-xl border border-[#e4dac5] bg-white px-4 py-3 text-[#1f2c22] focus:border-secondary focus:outline-none focus:ring-2 focus:ring-secondary/20 transition-all"
                     >
                       {yesNoOptions.map((option) => (

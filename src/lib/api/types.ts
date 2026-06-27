@@ -147,8 +147,8 @@ export interface RealEstateListing {
   phase?: RealEstatePhase;
   electricityStatus?: RealEstateElectricityStatus;
   ownershipProofType?: RealEstateOwnershipProofType;
-  hasInstallments?: boolean;
-  hasDeposit?: boolean;
+  areInstallmentsSettled?: boolean;
+  isDepositSettled?: boolean;
   hasFinalContract?: boolean;
 
   amenities?: RealEstateAmenity[];
@@ -205,8 +205,8 @@ export interface RealEstateOwnerSubmission {
   phase?: RealEstatePhase;
   electricityStatus?: RealEstateElectricityStatus;
   ownershipProofType?: RealEstateOwnershipProofType;
-  hasInstallments?: boolean;
-  hasDeposit?: boolean;
+  areInstallmentsSettled?: boolean;
+  isDepositSettled?: boolean;
   hasFinalContract?: boolean;
 
   amenities?: RealEstateAmenity[];
