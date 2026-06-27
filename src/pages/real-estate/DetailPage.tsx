@@ -7,10 +7,11 @@ import { realEstateService } from '../../lib/api/real-estate-service';
 import {
   formatCurrency,
   formatRealEstateFloor,
+  formatRealEstateAmenity,
+  normalizeRealEstateAmenities,
   realEstateTypeLabels,
   realEstateFinishingLabels,
   realEstateFinishingStatusLabels,
-  realEstateAmenityLabels,
   realEstatePhaseLabels,
   realEstateElectricityStatusLabels,
   realEstateOwnershipProofTypeLabels,
@@ -152,7 +153,10 @@ export function DetailPage() {
                   <p className="whitespace-pre-wrap leading-8 text-[#5f6e62]">{listing.description}</p>
                 </div>
 
-                {(listing.finishingStatus || listing.finishingType || listing.floor || listing.phase || listing.electricityStatus || listing.ownershipProofType || listing.amenities?.length || listing.hasInstallments !== undefined || listing.hasDeposit !== undefined || listing.hasFinalContract !== undefined) && (
+                {(() => {
+                  const amenities = normalizeRealEstateAmenities(listing.amenities);
+                  return listing.finishingStatus || listing.finishingType || listing.floor || listing.phase || listing.electricityStatus || listing.ownershipProofType || amenities.length || listing.hasInstallments !== undefined || listing.hasDeposit !== undefined || listing.hasFinalContract !== undefined;
+                })() && (
                   <div className="rounded-[28px] border border-[#e4dac5] bg-[#fcfaf6] p-5 sm:p-6">
                     <h3 className="mb-4 text-lg font-bold text-[#1f2c22]">مواصفات العقار</h3>
                     <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
@@ -170,18 +174,18 @@ export function DetailPage() {
                       <DetailBox label="المرحلة" value={listing.phase ? realEstatePhaseLabels[listing.phase] : '-'} />
                       <DetailBox label="حالة الكهرباء" value={listing.electricityStatus ? realEstateElectricityStatusLabels[listing.electricityStatus] : '-'} />
                       <DetailBox label="نوع إثبات الملكية" value={listing.ownershipProofType ? realEstateOwnershipProofTypeLabels[listing.ownershipProofType] : '-'} />
-                      <DetailBox label="الأقساط خاصة؟" value={listing.hasInstallments === undefined ? '-' : (listing.hasInstallments ? 'نعم' : 'لا')} />
-                      <DetailBox label="الوديعة خاصة؟" value={listing.hasDeposit === undefined ? '-' : (listing.hasDeposit ? 'نعم' : 'لا')} />
+                      <DetailBox label="الأقساط خالصة؟" value={listing.hasInstallments === undefined ? '-' : (listing.hasInstallments ? 'نعم' : 'لا')} />
+                      <DetailBox label="الوديعة خالصة؟" value={listing.hasDeposit === undefined ? '-' : (listing.hasDeposit ? 'نعم' : 'لا')} />
                       <DetailBox label="يوجد عقد نهائي؟" value={listing.hasFinalContract === undefined ? '-' : (listing.hasFinalContract ? 'نعم' : 'لا')} />
                     </div>
 
-                    {listing.amenities && listing.amenities.length > 0 && (
+                    {normalizeRealEstateAmenities(listing.amenities).length > 0 && (
                       <div className="mt-5 border-t border-[#e4dac5] pt-4">
                         <p className="mb-3 text-sm font-bold text-[#1f2c22]">الكماليات</p>
                         <div className="flex flex-wrap gap-2">
-                          {listing.amenities.map((amenity) => (
+                          {normalizeRealEstateAmenities(listing.amenities).map((amenity) => (
                             <span key={amenity} className="rounded-full bg-white px-3 py-1 text-xs font-bold text-[#1f2c22] shadow-sm">
-                              {realEstateAmenityLabels[amenity as keyof typeof realEstateAmenityLabels]}
+                              {formatRealEstateAmenity(amenity)}
                             </span>
                           ))}
                         </div>

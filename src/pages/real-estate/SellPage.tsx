@@ -12,6 +12,7 @@ import {
   realEstatePhaseLabels,
   realEstateElectricityStatusLabels,
   realEstateOwnershipProofTypeLabels,
+  normalizeRealEstateAmenities,
 } from '../../lib/formatters';
 
 const finishingStatusOptions = [
@@ -131,10 +132,10 @@ export function SellPage() {
       areaSqm: Number(formData.areaSqm),
       bedrooms: formData.bedrooms ? Number(formData.bedrooms) : undefined,
       bathrooms: formData.bathrooms ? Number(formData.bathrooms) : undefined,
-      floor: formData.floor || undefined,
+    floor: formData.floor === '' ? undefined : formData.floor,
       finishingStatus: formData.finishingStatus || undefined,
       furnishingStatus: formData.furnishingStatus || undefined,
-      amenities: formData.amenities.length ? formData.amenities : undefined,
+      amenities: formData.amenities.length ? normalizeRealEstateAmenities(formData.amenities) : undefined,
       phase: formData.phase || undefined,
       electricityStatus: formData.electricityStatus || undefined,
       ownershipProofType: formData.ownershipProofType || undefined,
@@ -473,7 +474,7 @@ export function SellPage() {
                 <h2 className="border-b border-[#e4dac5] pb-4 text-xl font-bold text-[#1f2c22]">الوضع المالي والقانوني</h2>
                 <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
                   <div>
-                    <label className="mb-2 block text-sm font-bold text-[#1f2c22]">الأقساط خاصة؟</label>
+                    <label className="mb-2 block text-sm font-bold text-[#1f2c22]">الأقساط خالصة؟</label>
                     <select
                       value={formData.hasInstallments}
                       onChange={(e) => setFormData({ ...formData, hasInstallments: e.target.value })}
@@ -487,7 +488,7 @@ export function SellPage() {
                     </select>
                   </div>
                   <div>
-                    <label className="mb-2 block text-sm font-bold text-[#1f2c22]">الوديعة خاصة؟</label>
+                    <label className="mb-2 block text-sm font-bold text-[#1f2c22]">الوديعة خالصة؟</label>
                     <select
                       value={formData.hasDeposit}
                       onChange={(e) => setFormData({ ...formData, hasDeposit: e.target.value })}

@@ -100,7 +100,7 @@ export const realEstateFloorLabels: Record<RealEstateFloor, string> = {
   ROOF: 'روف',
 };
 
-export const realEstateAmenityLabels: Record<RealEstateAmenity, string> = {
+const realEstateAmenityLabelMap: Record<string, string> = {
   ELEVATOR: 'مصعد',
   GARAGE: 'جراج',
   SECURITY: 'أمن وحراسة',
@@ -114,7 +114,44 @@ export const realEstateAmenityLabels: Record<RealEstateAmenity, string> = {
   ELECTRICAL_APPLIANCES: 'أجهزة كهربائية',
   BALCONY_OR_TERRACE: 'بلكونة أو تراس',
   LAND_SHARE: 'حصة بالأرض',
+  AIR_CONDITIONS: 'تكيفات',
 };
+
+export const realEstateAmenityLabels: Record<RealEstateAmenity, string> = {
+  ELEVATOR: realEstateAmenityLabelMap.ELEVATOR,
+  GARAGE: realEstateAmenityLabelMap.GARAGE,
+  SECURITY: realEstateAmenityLabelMap.SECURITY,
+  SURVEILLANCE_CAMERAS: realEstateAmenityLabelMap.SURVEILLANCE_CAMERAS,
+  INTERCOM: realEstateAmenityLabelMap.INTERCOM,
+  NATURAL_GAS: realEstateAmenityLabelMap.NATURAL_GAS,
+  WATER_METER: realEstateAmenityLabelMap.WATER_METER,
+  GAS_METER: realEstateAmenityLabelMap.GAS_METER,
+  AIR_CONDITIONERS: realEstateAmenityLabelMap.AIR_CONDITIONERS,
+  KITCHEN: realEstateAmenityLabelMap.KITCHEN,
+  ELECTRICAL_APPLIANCES: realEstateAmenityLabelMap.ELECTRICAL_APPLIANCES,
+  BALCONY_OR_TERRACE: realEstateAmenityLabelMap.BALCONY_OR_TERRACE,
+  LAND_SHARE: realEstateAmenityLabelMap.LAND_SHARE,
+};
+
+export function normalizeRealEstateAmenity(value?: string | null) {
+  if (!value) return null;
+  return value === 'AIR_CONDITIONS' ? 'AIR_CONDITIONERS' : value;
+}
+
+export function formatRealEstateAmenity(value?: string | null) {
+  const normalized = normalizeRealEstateAmenity(value);
+  if (!normalized) return 'غير متاح';
+  return realEstateAmenityLabelMap[normalized] ?? normalized;
+}
+
+export function normalizeRealEstateAmenities(values?: Array<string | null | undefined>) {
+  const unique = new Set<string>();
+  (values ?? []).forEach((value) => {
+    const normalized = normalizeRealEstateAmenity(value);
+    if (normalized) unique.add(normalized);
+  });
+  return Array.from(unique) as RealEstateAmenity[];
+}
 
 export const realEstatePhaseLabels: Record<RealEstatePhase, string> = {
   PHASE_ONE: 'المرحلة الأولى',
