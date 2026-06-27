@@ -4,7 +4,17 @@ import { useParams, Link, Navigate } from 'react-router-dom';
 import { type ReactNode } from 'react';
 import { CheckCircle2, ChevronLeft, ChevronRight, Expand, MapPin, X } from 'lucide-react';
 import { realEstateService } from '../../lib/api/real-estate-service';
-import { formatCurrency, realEstateTypeLabels, realEstateFinishingLabels } from '../../lib/formatters';
+import {
+  formatCurrency,
+  formatRealEstateFloor,
+  realEstateTypeLabels,
+  realEstateFinishingLabels,
+  realEstateFinishingStatusLabels,
+  realEstateAmenityLabels,
+  realEstatePhaseLabels,
+  realEstateElectricityStatusLabels,
+  realEstateOwnershipProofTypeLabels,
+} from '../../lib/formatters';
 import { ROUTES } from '../../lib/constants/routes';
 import type { ImageDto, RealEstateInquiryType } from '../../lib/api/types';
 import { PUBLIC_LANDS_ENABLED } from '../../lib/constants/visibility';
@@ -141,6 +151,44 @@ export function DetailPage() {
                   <h3 className="mb-4 text-lg font-bold text-[#1f2c22]">تفاصيل إضافية</h3>
                   <p className="whitespace-pre-wrap leading-8 text-[#5f6e62]">{listing.description}</p>
                 </div>
+
+                {(listing.finishingStatus || listing.finishingType || listing.floor || listing.phase || listing.electricityStatus || listing.ownershipProofType || listing.amenities?.length || listing.hasInstallments !== undefined || listing.hasDeposit !== undefined || listing.hasFinalContract !== undefined) && (
+                  <div className="rounded-[28px] border border-[#e4dac5] bg-[#fcfaf6] p-5 sm:p-6">
+                    <h3 className="mb-4 text-lg font-bold text-[#1f2c22]">مواصفات العقار</h3>
+                    <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                      <DetailBox
+                        label="حالة التشطيب"
+                        value={
+                          listing.finishingStatus
+                            ? realEstateFinishingStatusLabels[listing.finishingStatus]
+                            : listing.finishingType
+                              ? realEstateFinishingLabels[listing.finishingType]
+                              : '-'
+                        }
+                      />
+                      <DetailBox label="الدور" value={formatRealEstateFloor(listing.floor)} />
+                      <DetailBox label="المرحلة" value={listing.phase ? realEstatePhaseLabels[listing.phase] : '-'} />
+                      <DetailBox label="حالة الكهرباء" value={listing.electricityStatus ? realEstateElectricityStatusLabels[listing.electricityStatus] : '-'} />
+                      <DetailBox label="نوع إثبات الملكية" value={listing.ownershipProofType ? realEstateOwnershipProofTypeLabels[listing.ownershipProofType] : '-'} />
+                      <DetailBox label="الأقساط خاصة؟" value={listing.hasInstallments === undefined ? '-' : (listing.hasInstallments ? 'نعم' : 'لا')} />
+                      <DetailBox label="الوديعة خاصة؟" value={listing.hasDeposit === undefined ? '-' : (listing.hasDeposit ? 'نعم' : 'لا')} />
+                      <DetailBox label="يوجد عقد نهائي؟" value={listing.hasFinalContract === undefined ? '-' : (listing.hasFinalContract ? 'نعم' : 'لا')} />
+                    </div>
+
+                    {listing.amenities && listing.amenities.length > 0 && (
+                      <div className="mt-5 border-t border-[#e4dac5] pt-4">
+                        <p className="mb-3 text-sm font-bold text-[#1f2c22]">الكماليات</p>
+                        <div className="flex flex-wrap gap-2">
+                          {listing.amenities.map((amenity) => (
+                            <span key={amenity} className="rounded-full bg-white px-3 py-1 text-xs font-bold text-[#1f2c22] shadow-sm">
+                              {realEstateAmenityLabels[amenity as keyof typeof realEstateAmenityLabels]}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
             </div>
           </div>

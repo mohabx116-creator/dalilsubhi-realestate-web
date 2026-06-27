@@ -33,6 +33,62 @@ export type RealEstateFinishing =
   | 'FULLY_FINISHED'
   | 'FURNISHED';
 
+export type RealEstateFurnishingStatus =
+  | 'FURNISHED'
+  | 'UNFURNISHED'
+  | 'SEMI_FURNISHED';
+
+export type RealEstateFinishingStatus =
+  | 'WITHOUT_FINISHING'
+  | 'FINISHED'
+  | 'FINISHED_FURNISHED';
+
+export type RealEstateFloor =
+  | 'BASEMENT'
+  | 'GROUND'
+  | '1'
+  | '2'
+  | '3'
+  | '4'
+  | '5'
+  | '6'
+  | '7'
+  | '8'
+  | '9'
+  | '10'
+  | '11'
+  | '12'
+  | '13'
+  | '14'
+  | '15'
+  | '16'
+  | '17'
+  | '18'
+  | '19'
+  | '20'
+  | 'ROOF';
+
+export type RealEstateAmenity =
+  | 'ELEVATOR'
+  | 'GARAGE'
+  | 'SECURITY'
+  | 'SURVEILLANCE_CAMERAS'
+  | 'INTERCOM'
+  | 'NATURAL_GAS'
+  | 'WATER_METER'
+  | 'GAS_METER'
+  | 'AIR_CONDITIONERS'
+  | 'KITCHEN'
+  | 'ELECTRICAL_APPLIANCES'
+  | 'BALCONY_OR_TERRACE'
+  | 'LAND_SHARE';
+
+export type RealEstatePhase = 'PHASE_ONE' | 'PHASE_TWO';
+
+export type RealEstateElectricityStatus = 'ELECTRICITY_METER' | 'ELECTRICITY_PRACTICE';
+
+export type RealEstateOwnershipProofType = 'CONTRACT' | 'POWER_OF_ATTORNEY';
+
 export type RealEstateInquiryType = 'CONTACT' | 'INSPECTION' | 'INTEREST';
 
 export type RealEstateInquiryStatus = 'NEW' | 'CONTACTED' | 'CLOSED';
@@ -70,16 +126,32 @@ export interface RealEstateListing {
   utilitiesAvailable?: boolean;
   cornerPlot?: boolean;
   isRegistered?: boolean;
+  hasBuildingPermit?: boolean;
 
   // Building fields
   bedrooms?: number;
   bathrooms?: number;
-  floor?: number;
+  floor?: RealEstateFloor;
+  balconies?: number;
+  receptionRooms?: number;
+  buildingAge?: number;
+  buildingNumber?: string;
+  apartmentNumber?: string;
   finishingType?: RealEstateFinishing;
+  finishingStatus?: RealEstateFinishingStatus;
+  furnishingStatus?: 'FURNISHED' | 'UNFURNISHED' | 'SEMI_FURNISHED';
   deliveryStatus?: string;
   hasElevator?: boolean;
   hasParking?: boolean;
   view?: string;
+  phase?: RealEstatePhase;
+  electricityStatus?: RealEstateElectricityStatus;
+  ownershipProofType?: RealEstateOwnershipProofType;
+  hasInstallments?: boolean;
+  hasDeposit?: boolean;
+  hasFinalContract?: boolean;
+
+  amenities?: RealEstateAmenity[];
 
   isFeatured: boolean;
   createdAt: string;
@@ -112,16 +184,32 @@ export interface RealEstateOwnerSubmission {
   utilitiesAvailable?: boolean;
   cornerPlot?: boolean;
   isRegistered?: boolean;
+  hasBuildingPermit?: boolean;
 
   // Building fields
   bedrooms?: number;
   bathrooms?: number;
-  floor?: number;
+  floor?: RealEstateFloor;
+  balconies?: number;
+  receptionRooms?: number;
+  buildingAge?: number;
+  buildingNumber?: string;
+  apartmentNumber?: string;
   finishingType?: RealEstateFinishing;
+  finishingStatus?: RealEstateFinishingStatus;
+  furnishingStatus?: RealEstateFurnishingStatus;
   deliveryStatus?: string;
   hasElevator?: boolean;
   hasParking?: boolean;
   view?: string;
+  phase?: RealEstatePhase;
+  electricityStatus?: RealEstateElectricityStatus;
+  ownershipProofType?: RealEstateOwnershipProofType;
+  hasInstallments?: boolean;
+  hasDeposit?: boolean;
+  hasFinalContract?: boolean;
+
+  amenities?: RealEstateAmenity[];
 
   images?: ImageDto[];
   createdAt: string;

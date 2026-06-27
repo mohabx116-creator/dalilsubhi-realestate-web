@@ -5,7 +5,69 @@ import { Megaphone } from 'lucide-react';
 import { realEstateService } from '../../lib/api/real-estate-service';
 import { ROUTES } from '../../lib/constants/routes';
 import { type RealEstateType, realEstateTypes } from '../../lib/api/types';
-import { realEstateTypeLabels } from '../../lib/formatters';
+import {
+  realEstateTypeLabels,
+  realEstateFinishingStatusLabels,
+  realEstateAmenityLabels,
+  realEstatePhaseLabels,
+  realEstateElectricityStatusLabels,
+  realEstateOwnershipProofTypeLabels,
+} from '../../lib/formatters';
+
+const finishingStatusOptions = [
+  { value: '', label: 'بدون تحديد' },
+  ...Object.entries(realEstateFinishingStatusLabels).map(([value, label]) => ({ value, label })),
+];
+
+const floorOptions = [
+  { value: '', label: 'بدون تحديد' },
+  { value: 'BASEMENT', label: 'بدروم' },
+  { value: 'GROUND', label: 'أرضي' },
+  { value: '1', label: 'الأول' },
+  { value: '2', label: 'الثاني' },
+  { value: '3', label: 'الثالث' },
+  { value: '4', label: 'الرابع' },
+  { value: '5', label: 'الخامس' },
+  { value: '6', label: 'السادس' },
+  { value: '7', label: 'السابع' },
+  { value: '8', label: 'الثامن' },
+  { value: '9', label: 'التاسع' },
+  { value: '10', label: 'العاشر' },
+  { value: '11', label: 'الحادي عشر' },
+  { value: '12', label: 'الثاني عشر' },
+  { value: '13', label: 'الثالث عشر' },
+  { value: '14', label: 'الرابع عشر' },
+  { value: '15', label: 'الخامس عشر' },
+  { value: '16', label: 'السادس عشر' },
+  { value: '17', label: 'السابع عشر' },
+  { value: '18', label: 'الثامن عشر' },
+  { value: '19', label: 'التاسع عشر' },
+  { value: '20', label: 'العشرون' },
+  { value: 'ROOF', label: 'روف' },
+];
+
+const amenityOptions = Object.entries(realEstateAmenityLabels).map(([value, label]) => ({ value, label }));
+
+const phaseOptions = [
+  { value: '', label: 'بدون تحديد' },
+  ...Object.entries(realEstatePhaseLabels).map(([value, label]) => ({ value, label })),
+];
+
+const electricityStatusOptions = [
+  { value: '', label: 'بدون تحديد' },
+  ...Object.entries(realEstateElectricityStatusLabels).map(([value, label]) => ({ value, label })),
+];
+
+const ownershipProofOptions = [
+  { value: '', label: 'بدون تحديد' },
+  ...Object.entries(realEstateOwnershipProofTypeLabels).map(([value, label]) => ({ value, label })),
+];
+
+const yesNoOptions = [
+  { value: '', label: 'بدون تحديد' },
+  { value: 'true', label: 'نعم' },
+  { value: 'false', label: 'لا' },
+];
 
 export function SellPage() {
   const navigate = useNavigate();
@@ -21,6 +83,18 @@ export function SellPage() {
     description: '',
     bedrooms: '',
     bathrooms: '',
+    floor: '',
+    buildingNumber: '',
+    apartmentNumber: '',
+    finishingStatus: '',
+    furnishingStatus: '',
+    amenities: [] as string[],
+    phase: '',
+    electricityStatus: '',
+    ownershipProofType: '',
+    hasInstallments: '',
+    hasDeposit: '',
+    hasFinalContract: '',
   });
 
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -57,11 +131,31 @@ export function SellPage() {
       areaSqm: Number(formData.areaSqm),
       bedrooms: formData.bedrooms ? Number(formData.bedrooms) : undefined,
       bathrooms: formData.bathrooms ? Number(formData.bathrooms) : undefined,
+      floor: formData.floor || undefined,
+      finishingStatus: formData.finishingStatus || undefined,
+      furnishingStatus: formData.furnishingStatus || undefined,
+      amenities: formData.amenities.length ? formData.amenities : undefined,
+      phase: formData.phase || undefined,
+      electricityStatus: formData.electricityStatus || undefined,
+      ownershipProofType: formData.ownershipProofType || undefined,
+      hasInstallments: formData.hasInstallments === '' ? undefined : formData.hasInstallments === 'true',
+      hasDeposit: formData.hasDeposit === '' ? undefined : formData.hasDeposit === 'true',
+      hasFinalContract: formData.hasFinalContract === '' ? undefined : formData.hasFinalContract === 'true',
     };
 
     if (payload.type === 'LAND') {
       delete payload.bedrooms;
       delete payload.bathrooms;
+      delete payload.floor;
+      delete payload.finishingStatus;
+      delete payload.furnishingStatus;
+      delete payload.amenities;
+      delete payload.phase;
+      delete payload.electricityStatus;
+      delete payload.ownershipProofType;
+      delete payload.hasInstallments;
+      delete payload.hasDeposit;
+      delete payload.hasFinalContract;
     }
 
     submitMutation.mutate(payload);
@@ -226,6 +320,203 @@ export function SellPage() {
                 </div>
               </div>
             </div>
+          )}
+
+          {!isLand && (
+            <>
+              <div className="space-y-6">
+                <h2 className="border-b border-[#e4dac5] pb-4 text-xl font-bold text-[#1f2c22]">بيانات الوحدة</h2>
+                <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                  <div>
+                    <label className="mb-2 block text-sm font-bold text-[#1f2c22]">رقم العمارة</label>
+                    <input
+                      type="text"
+                      placeholder="مثال: 12"
+                      value={formData.buildingNumber}
+                      onChange={(e) => setFormData({ ...formData, buildingNumber: e.target.value })}
+                      className="w-full rounded-xl border border-[#e4dac5] bg-white px-4 py-3 text-[#1f2c22] placeholder-[#8c7f67] focus:border-secondary focus:outline-none focus:ring-2 focus:ring-secondary/20 transition-all"
+                    />
+                  </div>
+                  <div>
+                    <label className="mb-2 block text-sm font-bold text-[#1f2c22]">رقم الشقة</label>
+                    <input
+                      type="text"
+                      placeholder="مثال: 4B"
+                      value={formData.apartmentNumber}
+                      onChange={(e) => setFormData({ ...formData, apartmentNumber: e.target.value })}
+                      className="w-full rounded-xl border border-[#e4dac5] bg-white px-4 py-3 text-[#1f2c22] placeholder-[#8c7f67] focus:border-secondary focus:outline-none focus:ring-2 focus:ring-secondary/20 transition-all"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-6">
+                <h2 className="border-b border-[#e4dac5] pb-4 text-xl font-bold text-[#1f2c22]">التشطيب والدور</h2>
+                <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+                  <div>
+                    <label className="mb-2 block text-sm font-bold text-[#1f2c22]">حالة التشطيب</label>
+                    <select
+                      value={formData.finishingStatus}
+                      onChange={(e) => setFormData({ ...formData, finishingStatus: e.target.value })}
+                      className="w-full rounded-xl border border-[#e4dac5] bg-white px-4 py-3 text-[#1f2c22] focus:border-secondary focus:outline-none focus:ring-2 focus:ring-secondary/20 transition-all"
+                    >
+                      {finishingStatusOptions.map((option) => (
+                        <option key={option.value} value={option.value}>
+                          {option.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="mb-2 block text-sm font-bold text-[#1f2c22]">الدور</label>
+                    <select
+                      value={formData.floor}
+                      onChange={(e) => setFormData({ ...formData, floor: e.target.value })}
+                      className="w-full rounded-xl border border-[#e4dac5] bg-white px-4 py-3 text-[#1f2c22] focus:border-secondary focus:outline-none focus:ring-2 focus:ring-secondary/20 transition-all"
+                    >
+                      {floorOptions.map((option) => (
+                        <option key={option.value} value={option.value}>
+                          {option.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="mb-2 block text-sm font-bold text-[#1f2c22]">حالة الفرش</label>
+                    <select
+                      value={formData.furnishingStatus}
+                      onChange={(e) => setFormData({ ...formData, furnishingStatus: e.target.value })}
+                      className="w-full rounded-xl border border-[#e4dac5] bg-white px-4 py-3 text-[#1f2c22] focus:border-secondary focus:outline-none focus:ring-2 focus:ring-secondary/20 transition-all"
+                    >
+                      <option value="">بدون تحديد</option>
+                      <option value="FURNISHED">مفروشة</option>
+                      <option value="SEMI_FURNISHED">نصف مفروشة</option>
+                      <option value="UNFURNISHED">غير مفروشة</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-6">
+                <h2 className="border-b border-[#e4dac5] pb-4 text-xl font-bold text-[#1f2c22]">الكماليات والمرافق</h2>
+                <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
+                  {amenityOptions.map((option) => (
+                    <label key={option.value} className="flex items-center gap-3 rounded-xl border border-[#e4dac5] bg-white px-4 py-3 text-sm font-semibold">
+                      <input
+                        type="checkbox"
+                        checked={formData.amenities.includes(option.value)}
+                        onChange={() => {
+                          setFormData((prev) => ({
+                            ...prev,
+                            amenities: prev.amenities.includes(option.value)
+                              ? prev.amenities.filter((item) => item !== option.value)
+                              : [...prev.amenities, option.value],
+                          }));
+                        }}
+                        className="h-4 w-4"
+                      />
+                      <span>{option.label}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+
+              <div className="space-y-6">
+                <h2 className="border-b border-[#e4dac5] pb-4 text-xl font-bold text-[#1f2c22]">المرحلة وإثبات الملكية</h2>
+                <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+                  <div>
+                    <label className="mb-2 block text-sm font-bold text-[#1f2c22]">المرحلة</label>
+                    <select
+                      value={formData.phase}
+                      onChange={(e) => setFormData({ ...formData, phase: e.target.value })}
+                      className="w-full rounded-xl border border-[#e4dac5] bg-white px-4 py-3 text-[#1f2c22] focus:border-secondary focus:outline-none focus:ring-2 focus:ring-secondary/20 transition-all"
+                    >
+                      {phaseOptions.map((option) => (
+                        <option key={option.value} value={option.value}>
+                          {option.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="mb-2 block text-sm font-bold text-[#1f2c22]">حالة الكهرباء</label>
+                    <select
+                      value={formData.electricityStatus}
+                      onChange={(e) => setFormData({ ...formData, electricityStatus: e.target.value })}
+                      className="w-full rounded-xl border border-[#e4dac5] bg-white px-4 py-3 text-[#1f2c22] focus:border-secondary focus:outline-none focus:ring-2 focus:ring-secondary/20 transition-all"
+                    >
+                      {electricityStatusOptions.map((option) => (
+                        <option key={option.value} value={option.value}>
+                          {option.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="mb-2 block text-sm font-bold text-[#1f2c22]">نوع إثبات الملكية</label>
+                    <select
+                      value={formData.ownershipProofType}
+                      onChange={(e) => setFormData({ ...formData, ownershipProofType: e.target.value })}
+                      className="w-full rounded-xl border border-[#e4dac5] bg-white px-4 py-3 text-[#1f2c22] focus:border-secondary focus:outline-none focus:ring-2 focus:ring-secondary/20 transition-all"
+                    >
+                      {ownershipProofOptions.map((option) => (
+                        <option key={option.value} value={option.value}>
+                          {option.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-6">
+                <h2 className="border-b border-[#e4dac5] pb-4 text-xl font-bold text-[#1f2c22]">الوضع المالي والقانوني</h2>
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+                  <div>
+                    <label className="mb-2 block text-sm font-bold text-[#1f2c22]">الأقساط خاصة؟</label>
+                    <select
+                      value={formData.hasInstallments}
+                      onChange={(e) => setFormData({ ...formData, hasInstallments: e.target.value })}
+                      className="w-full rounded-xl border border-[#e4dac5] bg-white px-4 py-3 text-[#1f2c22] focus:border-secondary focus:outline-none focus:ring-2 focus:ring-secondary/20 transition-all"
+                    >
+                      {yesNoOptions.map((option) => (
+                        <option key={option.value} value={option.value}>
+                          {option.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="mb-2 block text-sm font-bold text-[#1f2c22]">الوديعة خاصة؟</label>
+                    <select
+                      value={formData.hasDeposit}
+                      onChange={(e) => setFormData({ ...formData, hasDeposit: e.target.value })}
+                      className="w-full rounded-xl border border-[#e4dac5] bg-white px-4 py-3 text-[#1f2c22] focus:border-secondary focus:outline-none focus:ring-2 focus:ring-secondary/20 transition-all"
+                    >
+                      {yesNoOptions.map((option) => (
+                        <option key={option.value} value={option.value}>
+                          {option.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="mb-2 block text-sm font-bold text-[#1f2c22]">يوجد عقد نهائي؟</label>
+                    <select
+                      value={formData.hasFinalContract}
+                      onChange={(e) => setFormData({ ...formData, hasFinalContract: e.target.value })}
+                      className="w-full rounded-xl border border-[#e4dac5] bg-white px-4 py-3 text-[#1f2c22] focus:border-secondary focus:outline-none focus:ring-2 focus:ring-secondary/20 transition-all"
+                    >
+                      {yesNoOptions.map((option) => (
+                        <option key={option.value} value={option.value}>
+                          {option.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+              </div>
+            </>
           )}
 
           <div className="rounded-2xl border border-[#bfe6d8] bg-[#eefaf4] p-6">
