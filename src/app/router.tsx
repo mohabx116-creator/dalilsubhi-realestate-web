@@ -7,40 +7,45 @@ import { LandsPage } from '../pages/real-estate/LandsPage';
 import { DetailPage } from '../pages/real-estate/DetailPage';
 import { SellPage } from '../pages/real-estate/SellPage';
 import { SuccessPage } from '../pages/real-estate/SuccessPage';
+import { PUBLIC_LANDS_ENABLED } from '../lib/constants/visibility';
+
+function LandRoutesDisabled() {
+  return <Navigate replace to="/properties" />;
+}
 
 export const router = createBrowserRouter([
   {
     path: '/',
     element: <PublicRealEstateShell />,
-        children: [
-          {
-            index: true,
-            element: <HomePage />,
-          },
-          {
-            path: 'properties',
-            element: <PropertiesPage />,
-          },
-          {
-            path: 'properties/:slug',
-            element: <DetailPage />,
-          },
-          {
-            path: 'lands',
-            element: <LandsPage />,
-          },
-          {
-            path: 'lands/:slug',
-            element: <DetailPage />,
-          },
-          {
-            path: 'sell',
-            element: <SellPage />,
-          },
-          {
-            path: 'success',
-            element: <SuccessPage />,
-          },
+    children: [
+      {
+        index: true,
+        element: <HomePage />,
+      },
+      {
+        path: 'properties',
+        element: <PropertiesPage />,
+      },
+      {
+        path: 'properties/:slug',
+        element: <DetailPage />,
+      },
+      {
+        path: 'lands',
+        element: PUBLIC_LANDS_ENABLED ? <LandsPage /> : <LandRoutesDisabled />,
+      },
+      {
+        path: 'lands/:slug',
+        element: PUBLIC_LANDS_ENABLED ? <DetailPage /> : <LandRoutesDisabled />,
+      },
+      {
+        path: 'sell',
+        element: <SellPage />,
+      },
+      {
+        path: 'success',
+        element: <SuccessPage />,
+      },
       { path: '404', element: <NotFoundPage /> },
       { path: '*', element: <Navigate replace to="/404" /> },
     ],

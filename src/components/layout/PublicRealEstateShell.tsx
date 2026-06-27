@@ -14,7 +14,7 @@ export function PublicRealEstateShell() {
             </span>
             <div className="text-right">
               <p className="text-sm font-black text-[#12221b] sm:text-base">عقارات دليل السبحي</p>
-              <p className="hidden text-[10px] font-semibold text-neutral-500 sm:block">بوابة مخصصة لبيع العقارات والأراضي</p>
+              <p className="hidden text-[10px] font-semibold text-neutral-500 sm:block">بوابة مخصصة لبيع العقارات المعروضة</p>
             </div>
           </Link>
 

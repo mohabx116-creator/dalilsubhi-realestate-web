@@ -1,11 +1,12 @@
 import { useMutation, useQuery } from '@tanstack/react-query';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, Navigate } from 'react-router-dom';
 import { useState, type ReactNode } from 'react';
 import { CheckCircle2, ChevronRight, MapPin } from 'lucide-react';
 import { realEstateService } from '../../lib/api/real-estate-service';
 import { formatCurrency, realEstateTypeLabels, realEstateFinishingLabels } from '../../lib/formatters';
 import { ROUTES } from '../../lib/constants/routes';
 import type { RealEstateInquiryType } from '../../lib/api/types';
+import { PUBLIC_LANDS_ENABLED } from '../../lib/constants/visibility';
 
 export function DetailPage() {
   const { slug } = useParams<{ slug: string }>();
@@ -69,6 +70,9 @@ export function DetailPage() {
   }
 
   const isLand = listing.type === 'LAND';
+  if (isLand && !PUBLIC_LANDS_ENABLED) {
+    return <Navigate replace to={ROUTES.PROPERTIES} />;
+  }
   const parentRoute = isLand ? ROUTES.LANDS : ROUTES.PROPERTIES;
   const parentLabel = isLand ? 'أراضي المنطقة' : 'عقارات المنطقة';
 

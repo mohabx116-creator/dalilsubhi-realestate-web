@@ -1,4 +1,4 @@
-import { Building2, Map } from 'lucide-react';
+import { Building2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { OWNER_SUBMISSION_URL } from '../../lib/constants/links';
 import { ROUTES } from '../../lib/constants/routes';
@@ -16,11 +16,11 @@ export function HomePage() {
             عقارات المنطقة
           </h1>
           <p className="mx-auto mt-4 max-w-2xl text-sm leading-7 text-[#506053] sm:text-base sm:leading-8">
-            بوابة مخصصة لعرض عقارات وأراضي المنطقة للبيع بطريقة واضحة وآمنة ومريحة للعين.
+            بوابة مخصصة لعرض عقارات المنطقة للبيع بطريقة واضحة وآمنة ومريحة للعين.
           </p>
         </div>
 
-        <div className="mt-12 grid gap-6 md:grid-cols-2 max-w-4xl mx-auto">
+        <div className="mx-auto mt-12 grid max-w-2xl gap-6">
           <div className="rounded-2xl border border-[#ebdcb9]/60 bg-white/70 p-8 text-center shadow-[0_8px_30px_rgba(28,45,34,0.02)] backdrop-blur-sm transition duration-300 hover:-translate-y-1 hover:shadow-md hover:border-[#d6b25e]/30">
             <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-secondary/5 text-secondary">
               <Building2 className="h-7 w-7" />
@@ -36,27 +36,11 @@ export function HomePage() {
               تصفح العقارات
             </Link>
           </div>
-
-          <div className="rounded-2xl border border-[#ebdcb9]/60 bg-white/70 p-8 text-center shadow-[0_8px_30px_rgba(28,45,34,0.02)] backdrop-blur-sm transition duration-300 hover:-translate-y-1 hover:shadow-md hover:border-[#d6b25e]/30">
-            <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-tertiary/10 text-tertiary">
-              <Map className="h-7 w-7" />
-            </div>
-            <h2 className="text-xl font-black text-[#12221b]">أراضي المنطقة</h2>
-            <p className="mt-3 text-xs leading-6 text-[#506053]">
-              استعرض الأراضي المتاحة للبيع داخل المنطقة وحولها.
-            </p>
-            <Link
-              to={ROUTES.LANDS}
-              className="mt-6 inline-flex min-h-10 items-center justify-center rounded-full bg-secondary px-6 py-2 text-xs font-bold text-white shadow-md shadow-secondary/15 transition hover:bg-secondary/95"
-            >
-              تصفح الأراضي
-            </Link>
-          </div>
         </div>
 
         <div className="mt-16 text-center max-w-xl mx-auto space-y-6">
           <div className="p-6 rounded-2xl border border-[#ebdcb9]/65 bg-[#fdfcf9]">
-            <p className="text-sm font-bold text-[#12221b]">هل تمتلك عقاراً أو أرضاً للبيع؟</p>
+            <p className="text-sm font-bold text-[#12221b]">هل تمتلك عقاراً للبيع؟</p>
             <p className="mt-1 text-xs text-neutral-500">أضف عقارك بسهولة في خطوات بسيطة وسريعة وسنتواصل معك.</p>
             <Link
               to={ROUTES.SELL}
