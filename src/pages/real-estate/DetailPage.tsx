@@ -1,11 +1,12 @@
+import { useEffect, useRef, useState } from 'react';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { useParams, Link, Navigate } from 'react-router-dom';
-import { useState, type ReactNode } from 'react';
-import { CheckCircle2, ChevronRight, MapPin } from 'lucide-react';
+import { type ReactNode } from 'react';
+import { CheckCircle2, ChevronLeft, ChevronRight, Expand, MapPin, X } from 'lucide-react';
 import { realEstateService } from '../../lib/api/real-estate-service';
 import { formatCurrency, realEstateTypeLabels, realEstateFinishingLabels } from '../../lib/formatters';
 import { ROUTES } from '../../lib/constants/routes';
-import type { RealEstateInquiryType } from '../../lib/api/types';
+import type { ImageDto, RealEstateInquiryType } from '../../lib/api/types';
 import { PUBLIC_LANDS_ENABLED } from '../../lib/constants/visibility';
 
 export function DetailPage() {
@@ -75,6 +76,7 @@ export function DetailPage() {
   }
   const parentRoute = isLand ? ROUTES.LANDS : ROUTES.PROPERTIES;
   const parentLabel = isLand ? 'أراضي المنطقة' : 'عقارات المنطقة';
+  const images = listing.images ?? [];
 
 
 
@@ -97,11 +99,7 @@ export function DetailPage() {
           <div className="space-y-8 lg:col-span-2">
             <div className="glass-card overflow-hidden rounded-[32px]">
               <div className="relative aspect-video bg-[#f3ede2]">
-                {listing.images && listing.images.length > 0 ? (
-                  <img src={listing.images[0].url} alt={listing.title} className="h-full w-full object-cover" />
-                ) : (
-                  <div className="flex h-full w-full items-center justify-center text-[#8c7f67]">بدون صورة</div>
-                )}
+                <PropertyGallery images={images} title={listing.title} />
                 <div className="absolute right-4 top-4 rounded-full bg-white/90 px-3 py-1 text-sm font-bold text-secondary shadow-sm backdrop-blur-md">
                   {realEstateTypeLabels[listing.type]}
                 </div>
@@ -251,6 +249,262 @@ function DetailBox({ label, value }: { label: string; value: ReactNode }) {
     <div className="flex flex-col gap-1">
       <span className="text-xs text-[#5f6e62]">{label}</span>
       <span className="text-sm font-bold text-[#1f2c22]">{value}</span>
+    </div>
+  );
+}
+
+function PropertyGallery({ images, title }: { images: ImageDto[]; title: string }) {
+  const viewportRef = useRef<HTMLDivElement>(null);
+  const [activeIndex, setActiveIndex] = useState(0);
+  const [zoomedIndex, setZoomedIndex] = useState<number | null>(null);
+
+  const hasMultiple = images.length > 1;
+  useEffect(() => {
+    setActiveIndex(0);
+    setZoomedIndex(null);
+  }, [images]);
+
+  useEffect(() => {
+    if (!hasMultiple || !viewportRef.current) return;
+    const viewport = viewportRef.current;
+    const width = viewport.clientWidth || 1;
+    viewport.scrollTo({ left: activeIndex * width, behavior: 'smooth' });
+  }, [activeIndex, hasMultiple]);
+
+  useEffect(() => {
+    if (zoomedIndex === null) return;
+
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setZoomedIndex(null);
+      if (event.key === 'ArrowRight' && images.length > 1) {
+        setZoomedIndex((current) => (current === null ? 0 : (current + 1) % images.length));
+      }
+      if (event.key === 'ArrowLeft' && images.length > 1) {
+        setZoomedIndex((current) => (current === null ? 0 : (current - 1 + images.length) % images.length));
+      }
+    };
+
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [images.length, zoomedIndex]);
+
+  function handleScroll() {
+    if (!viewportRef.current) return;
+    const width = viewportRef.current.clientWidth || 1;
+    const nextIndex = Math.round(viewportRef.current.scrollLeft / width);
+    if (nextIndex !== activeIndex) {
+      setActiveIndex(Math.max(0, Math.min(images.length - 1, nextIndex)));
+    }
+  }
+
+  function step(delta: number) {
+    const nextIndex = Math.max(0, Math.min(images.length - 1, activeIndex + delta));
+    setActiveIndex(nextIndex);
+  }
+
+  if (images.length === 0) {
+    return (
+      <div className="flex h-full w-full items-center justify-center text-[#8c7f67]">بدون صورة</div>
+    );
+  }
+
+  if (!hasMultiple) {
+    return (
+      <>
+        <button
+          type="button"
+          onClick={() => setZoomedIndex(0)}
+          className="group relative block h-full w-full cursor-zoom-in"
+          aria-label={`فتح الصورة بحجم أكبر: ${title}`}
+        >
+          <img src={images[0].url} alt={title} className="h-full w-full object-cover" />
+          <span className="pointer-events-none absolute bottom-4 left-4 inline-flex items-center gap-2 rounded-full bg-black/65 px-3 py-1.5 text-xs font-semibold text-white backdrop-blur-md">
+            <Expand className="h-3.5 w-3.5" />
+            تكبير الصورة
+          </span>
+        </button>
+        {zoomedIndex === 0 && <Lightbox images={images} title={title} activeIndex={0} onClose={() => setZoomedIndex(null)} onChange={setZoomedIndex} />}
+      </>
+    );
+  }
+
+  return (
+    <>
+      <div className="relative h-full w-full">
+        <div
+          ref={viewportRef}
+          onScroll={handleScroll}
+          className="flex h-full w-full snap-x snap-mandatory overflow-x-auto scroll-smooth touch-pan-x"
+          aria-label={`معرض صور العقار، ${activeIndex + 1} من ${images.length}`}
+        >
+          {images.map((image, index) => (
+            <button
+              key={image.id}
+              type="button"
+              onClick={() => setZoomedIndex(index)}
+              className="relative h-full min-w-full snap-start cursor-zoom-in"
+              aria-label={`فتح الصورة ${index + 1} من ${images.length} بحجم أكبر`}
+            >
+              <img src={image.url} alt={`${title} - صورة ${index + 1}`} className="h-full w-full object-cover" />
+            </button>
+          ))}
+        </div>
+
+        <div className="pointer-events-none absolute inset-x-4 top-4 flex items-start justify-between gap-3">
+          <span className="inline-flex items-center rounded-full bg-black/65 px-3 py-1.5 text-xs font-bold text-white backdrop-blur-md">
+            {activeIndex + 1} / {images.length}
+          </span>
+          <span className="inline-flex items-center rounded-full bg-black/65 px-3 py-1.5 text-xs font-bold text-white backdrop-blur-md">
+            اسحب بين الصور
+          </span>
+        </div>
+
+        <div className="absolute inset-y-0 right-3 flex items-center">
+          <button
+            type="button"
+            onClick={() => step(-1)}
+            disabled={activeIndex === 0}
+            className="inline-flex h-11 w-11 items-center justify-center rounded-full bg-white/90 text-[#1f2c22] shadow-lg backdrop-blur-md transition hover:bg-white disabled:cursor-not-allowed disabled:opacity-40 rtl:rotate-180"
+            aria-label="الصورة السابقة"
+          >
+            <ChevronLeft className="h-5 w-5" />
+          </button>
+        </div>
+
+        <div className="absolute inset-y-0 left-3 flex items-center">
+          <button
+            type="button"
+            onClick={() => step(1)}
+            disabled={activeIndex === images.length - 1}
+            className="inline-flex h-11 w-11 items-center justify-center rounded-full bg-white/90 text-[#1f2c22] shadow-lg backdrop-blur-md transition hover:bg-white disabled:cursor-not-allowed disabled:opacity-40 rtl:rotate-180"
+            aria-label="الصورة التالية"
+          >
+            <ChevronRight className="h-5 w-5" />
+          </button>
+        </div>
+
+        <button
+          type="button"
+          onClick={() => setZoomedIndex(activeIndex)}
+          className="absolute bottom-4 right-4 inline-flex items-center gap-2 rounded-full bg-black/65 px-3 py-1.5 text-xs font-semibold text-white backdrop-blur-md transition hover:bg-black/75"
+          aria-label={`فتح الصورة الحالية بحجم أكبر: ${title}`}
+        >
+          <Expand className="h-3.5 w-3.5" />
+          تكبير الصورة
+        </button>
+      </div>
+
+      <div className="mt-4 flex gap-3 overflow-x-auto pb-1">
+        {images.map((image, index) => (
+          <button
+            key={image.id}
+            type="button"
+            onClick={() => setActiveIndex(index)}
+            className={`relative h-16 w-20 shrink-0 overflow-hidden rounded-xl border-2 transition ${
+              index === activeIndex ? 'border-secondary shadow-md' : 'border-transparent opacity-80 hover:opacity-100'
+            }`}
+            aria-label={`عرض الصورة ${index + 1} من ${images.length}`}
+          >
+            <img src={image.url} alt={`${title} - مصغرة ${index + 1}`} className="h-full w-full object-cover" />
+          </button>
+        ))}
+      </div>
+
+      {zoomedIndex !== null && (
+        <Lightbox
+          images={images}
+          title={title}
+          activeIndex={zoomedIndex}
+          onClose={() => setZoomedIndex(null)}
+          onChange={setZoomedIndex}
+        />
+      )}
+    </>
+  );
+}
+
+function Lightbox({
+  images,
+  title,
+  activeIndex,
+  onClose,
+  onChange,
+}: {
+  images: ImageDto[];
+  title: string;
+  activeIndex: number;
+  onClose: () => void;
+  onChange: (index: number) => void;
+}) {
+  const hasMultiple = images.length > 1;
+
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') onClose();
+      if (!hasMultiple) return;
+      if (event.key === 'ArrowRight') onChange((activeIndex + 1) % images.length);
+      if (event.key === 'ArrowLeft') onChange((activeIndex - 1 + images.length) % images.length);
+    };
+
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [activeIndex, hasMultiple, images.length, onChange, onClose]);
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 px-4 py-6"
+      role="dialog"
+      aria-modal="true"
+      aria-label={`معاينة صور العقار: ${title}`}
+      onClick={onClose}
+    >
+      <div
+        className="relative w-full max-w-6xl overflow-hidden rounded-[28px] bg-black shadow-2xl"
+        onClick={(event) => event.stopPropagation()}
+      >
+        <div className="flex items-center justify-between border-b border-white/10 px-4 py-3 text-white">
+          <span className="text-sm font-semibold">{activeIndex + 1} / {images.length}</span>
+          <button
+            type="button"
+            onClick={onClose}
+            className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-white/10 transition hover:bg-white/20"
+            aria-label="إغلاق المعاينة"
+          >
+            <X className="h-5 w-5" />
+          </button>
+        </div>
+
+        <div className="relative bg-black">
+          <div className="flex min-h-[50vh] items-center justify-center">
+            <img
+              src={images[activeIndex].url}
+              alt={`${title} - صورة ${activeIndex + 1}`}
+              className="max-h-[75vh] w-full object-contain"
+            />
+          </div>
+
+          {hasMultiple && (
+            <>
+              <button
+                type="button"
+                onClick={() => onChange((activeIndex - 1 + images.length) % images.length)}
+                className="absolute inset-y-0 right-3 my-auto inline-flex h-11 w-11 items-center justify-center rounded-full bg-white/90 text-[#1f2c22] shadow-lg transition hover:bg-white rtl:rotate-180"
+                aria-label="الصورة السابقة"
+              >
+                <ChevronLeft className="h-5 w-5" />
+              </button>
+              <button
+                type="button"
+                onClick={() => onChange((activeIndex + 1) % images.length)}
+                className="absolute inset-y-0 left-3 my-auto inline-flex h-11 w-11 items-center justify-center rounded-full bg-white/90 text-[#1f2c22] shadow-lg transition hover:bg-white rtl:rotate-180"
+                aria-label="الصورة التالية"
+              >
+                <ChevronRight className="h-5 w-5" />
+              </button>
+            </>
+          )}
+        </div>
+      </div>
     </div>
   );
 }

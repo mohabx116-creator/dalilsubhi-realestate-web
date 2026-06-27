@@ -101,6 +101,11 @@ export function PropertiesPage() {
                   <div className="absolute right-3 top-3 rounded-full bg-[#12221b]/80 px-2.5 py-1 text-[10px] font-bold text-white shadow-sm backdrop-blur-md">
                     {realEstateTypeLabels[listing.type]}
                   </div>
+                  {((listing.images?.length ?? 0) > 1) && (
+                    <div className="absolute bottom-3 left-3 rounded-full bg-white/90 px-2.5 py-1 text-[10px] font-bold text-[#12221b] shadow-sm backdrop-blur-md">
+                      {listing.images?.length} صور
+                    </div>
+                  )}
                 </div>
 
                 <div className="space-y-4 p-5 text-right">
