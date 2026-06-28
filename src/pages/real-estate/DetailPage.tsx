@@ -22,8 +22,10 @@ export function DetailPage() {
   const [phone, setPhone] = useState('');
   const [success, setSuccess] = useState(false);
   const [whatsappUrl, setWhatsappUrl] = useState<string | null>(null);
+  const [whatsappPopupBlocked, setWhatsappPopupBlocked] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const whatsappWindowRef = useRef<Window | null>(null);
+  const inquirySubmitLockRef = useRef(false);
 
   const { data, isLoading, error } = useQuery({
     queryKey: ['real-estate', 'listing', slug],
@@ -37,6 +39,7 @@ export function DetailPage() {
     mutationFn: (payload: { listingId: string; customerName: string; customerPhone: string }) =>
       realEstateService.createRealEstateInquiry(payload),
     onSuccess: (response) => {
+      inquirySubmitLockRef.current = false;
       setSuccess(true);
       setWhatsappUrl(response.data.whatsappUrl ?? null);
       setErrorMessage(null);
@@ -44,11 +47,15 @@ export function DetailPage() {
       if (whatsappWindowRef.current && response.data.whatsappUrl) {
         whatsappWindowRef.current.location.href = response.data.whatsappUrl;
         whatsappWindowRef.current.focus();
+        setWhatsappPopupBlocked(false);
+      } else if (response.data.whatsappUrl) {
+        setWhatsappPopupBlocked(true);
       }
 
       whatsappWindowRef.current = null;
     },
     onError: (error: any) => {
+      inquirySubmitLockRef.current = false;
       let apiMessage = error.details?.message || error.message;
 
       try {
@@ -63,6 +70,8 @@ export function DetailPage() {
       }
 
       setErrorMessage(apiMessage ? `تأكد من صحة البيانات: ${apiMessage}` : 'حدث خطأ أثناء الإرسال. حاول مرة أخرى.');
+      setWhatsappPopupBlocked(false);
+      whatsappWindowRef.current = null;
     },
   });
 
@@ -194,14 +203,18 @@ export function DetailPage() {
                     سيتم مراجعة بيانات الطلب ثم فتح واتساب لإكمال التواصل معك.
                   </p>
                   {whatsappUrl ? (
-                    <a
-                      href={whatsappUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-secondary px-6 py-3 font-bold text-white shadow-lg shadow-secondary/20 transition hover:-translate-y-0.5 hover:bg-secondary/90"
-                    >
-                      فتح واتساب لإكمال الطلب
-                    </a>
+                    whatsappPopupBlocked ? (
+                      <a
+                        href={whatsappUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-secondary px-6 py-3 font-bold text-white shadow-lg shadow-secondary/20 transition hover:-translate-y-0.5 hover:bg-secondary/90"
+                      >
+                        فتح واتساب لإكمال الطلب
+                      </a>
+                    ) : (
+                      <p className="text-sm font-semibold text-[#5f6e62]">سيتم فتح واتساب تلقائيًا إذا سمح المتصفح.</p>
+                    )
                   ) : (
                     <p className="text-sm font-semibold text-[#5f6e62]">إذا لم يفتح واتساب تلقائيًا، فحاول مرة أخرى من زر الإرسال.</p>
                   )}
@@ -210,8 +223,16 @@ export function DetailPage() {
                 <form
                   onSubmit={(e) => {
                     e.preventDefault();
+                    if (inquirySubmitLockRef.current || inquiryMutation.isPending) {
+                      return;
+                    }
+                    inquirySubmitLockRef.current = true;
+                    setWhatsappPopupBlocked(false);
                     setErrorMessage(null);
-                    whatsappWindowRef.current = window.open('', '_blank', 'noopener,noreferrer');
+                    whatsappWindowRef.current = window.open('about:blank', '_blank', 'noopener,noreferrer');
+                    if (!whatsappWindowRef.current) {
+                      setWhatsappPopupBlocked(true);
+                    }
                     inquiryMutation.mutate({
                       listingId: listing.id,
                       customerName: name,
@@ -253,7 +274,7 @@ export function DetailPage() {
 
                   <button
                     type="submit"
-                    disabled={inquiryMutation.isPending}
+                    disabled={inquiryMutation.isPending || inquirySubmitLockRef.current}
                     className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-secondary px-6 py-4 font-bold text-white shadow-lg shadow-secondary/20 transition hover:-translate-y-0.5 hover:bg-secondary/90 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0"
                   >
                     {inquiryMutation.isPending ? 'جاري الإرسال...' : 'إرسال طلب العرض'}

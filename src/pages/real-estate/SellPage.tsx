@@ -32,17 +32,17 @@ const floorOptions = [
 const amenityOptions = Object.entries(realEstateAmenityLabels).map(([value, label]) => ({ value, label }));
 
 const phaseOptions = [
-  { value: '', label: 'بدون تحديد' },
+  { value: '', label: 'اختر المرحلة' },
   ...Object.entries(realEstatePhaseLabels).map(([value, label]) => ({ value, label })),
 ];
 
 const ownershipProofOptions = [
-  { value: '', label: 'بدون تحديد' },
+  { value: '', label: 'اختر نوع إثبات الملكية' },
   ...Object.entries(realEstateOwnershipProofTypeLabels).map(([value, label]) => ({ value, label })),
 ];
 
 const yesNoOptions = [
-  { value: '', label: 'بدون تحديد' },
+  { value: '', label: 'اختر الإجابة' },
   { value: 'true', label: 'نعم' },
   { value: 'false', label: 'لا' },
 ];
