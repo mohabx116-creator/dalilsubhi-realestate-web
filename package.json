@@ -8,7 +8,8 @@
     "type-check": "tsc -b --noEmit",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "sync:real-estate-fallback": "node scripts/import-real-estate-fallback.mjs"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.4.0",

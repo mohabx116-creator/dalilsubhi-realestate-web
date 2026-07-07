@@ -1,59 +1,46 @@
-import { useQuery } from '@tanstack/react-query';
+import { useEffect, useState } from 'react';
 import { Building2, Bed, Bath, MapPin, Maximize2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { SafeRealEstateImage } from '../../components/real-estate/SafeRealEstateImage';
 import { realEstateService } from '../../lib/api/real-estate-service';
+import type { RealEstateListing } from '../../lib/api/types';
 import { formatCurrency } from '../../lib/formatters';
 import { ROUTES } from '../../lib/constants/routes';
-
-function ListingSkeleton() {
-  return (
-    <div className="animate-pulse overflow-hidden rounded-2xl border border-neutral-100 bg-white shadow-sm">
-      <div className="aspect-[16/10] bg-neutral-100" />
-      <div className="space-y-4 p-5">
-        <div className="h-4 w-20 rounded-full bg-neutral-100" />
-        <div className="h-5 w-3/4 rounded-full bg-neutral-100" />
-        <div className="h-6 w-24 rounded-full bg-neutral-100" />
-        <div className="grid grid-cols-3 gap-2">
-          <div className="h-10 rounded-xl bg-neutral-100" />
-          <div className="h-10 rounded-xl bg-neutral-100" />
-          <div className="h-10 rounded-xl bg-neutral-100" />
-        </div>
-      </div>
-    </div>
-  );
-}
+import {
+  getFallbackRealEstateProperties,
+  replaceRealEstateListingsBySource,
+} from '../../lib/real-estate-fallback';
 
 export function PropertiesPage() {
-  const { data, isLoading, error } = useQuery({
-    queryKey: ['real-estate', 'listings', 'properties'],
-    queryFn: async () => {
-      return await realEstateService.listRealEstateListings();
-    },
-  });
+  const [listings, setListings] = useState<RealEstateListing[]>(() => getFallbackRealEstateProperties());
 
-  if (isLoading) {
-    return (
-      <main className="min-h-[calc(100dvh-4rem)] bg-[#fcfaf6] px-4 py-16 sm:px-6 lg:px-8">
-        <div className="mx-auto grid min-h-[40vh] max-w-7xl gap-6 md:grid-cols-2 xl:grid-cols-3">
-          {Array.from({ length: 6 }).map((_, index) => (
-            <ListingSkeleton key={index} />
-          ))}
-        </div>
-      </main>
-    );
-  }
+  useEffect(() => {
+    let active = true;
 
-  if (error) {
-    return (
-      <main className="min-h-[calc(100dvh-4rem)] bg-[#fcfaf6] px-4 py-16 sm:px-6 lg:px-8">
-        <div className="mx-auto flex min-h-[40vh] max-w-3xl flex-col items-center justify-center text-center">
-          <p className="font-bold text-rose-700 text-sm">عذراً، حدث خطأ أثناء تحميل العقارات.</p>
-        </div>
-      </main>
-    );
-  }
+    realEstateService
+      .listRealEstateListings()
+      .then((response) => {
+        if (!active) {
+          return;
+        }
 
-  const listings = data?.data || [];
+        const freshListings = replaceRealEstateListingsBySource(response.data, 'properties');
+        if (freshListings.length > 0) {
+          setListings(freshListings);
+        }
+      })
+      .catch(() => {
+        if (!active) {
+          return;
+        }
+
+        setListings(getFallbackRealEstateProperties());
+      });
+
+    return () => {
+      active = false;
+    };
+  }, []);
 
   return (
     <main className="min-h-[calc(100dvh-4rem)] bg-[#fcfaf6] px-4 py-16 sm:px-6 lg:px-8">
@@ -70,9 +57,25 @@ export function PropertiesPage() {
         </header>
 
         {listings.length === 0 ? (
-          <div className="rounded-2xl border border-[#ebdcb9]/60 bg-white/70 mt-12 p-10 text-center shadow-[0_8px_30px_rgba(28,45,34,0.02)] backdrop-blur-sm">
+          <div className="mt-12 rounded-2xl border border-[#ebdcb9]/60 bg-white/70 p-10 text-center shadow-[0_8px_30px_rgba(28,45,34,0.02)] backdrop-blur-sm">
             <Building2 className="mx-auto h-10 w-10 text-tertiary" />
-            <p className="mt-3 text-sm text-neutral-500">لا توجد عقارات متاحة حالياً.</p>
+            <p className="mt-3 text-sm text-neutral-500">
+              لا توجد عقارات متاحة حاليًا. تواصل معنا لإضافة عقار معروض جديد.
+            </p>
+            <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
+              <Link
+                to={ROUTES.SELL}
+                className="inline-flex min-h-11 items-center justify-center rounded-full bg-secondary px-5 py-3 text-sm font-bold text-white shadow-md shadow-secondary/15 transition hover:bg-secondary/95"
+              >
+                أضف عقارك
+              </Link>
+              <Link
+                to={ROUTES.HOME}
+                className="inline-flex min-h-11 items-center justify-center rounded-full border border-[#e4dac5] bg-white px-5 py-3 text-sm font-bold text-[#1f2c22] transition hover:bg-[#fbf7ef]"
+              >
+                العودة للرئيسية
+              </Link>
+            </div>
           </div>
         ) : (
           <div className="mt-12 grid gap-6 md:grid-cols-2 xl:grid-cols-3">
@@ -80,20 +83,16 @@ export function PropertiesPage() {
               <Link
                 key={listing.id}
                 to={ROUTES.PROPERTY_DETAIL(listing.slug)}
-                className="group overflow-hidden rounded-2xl border border-[#ebdcb9]/50 bg-white shadow-[0_8px_30px_rgba(28,45,34,0.03)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_20px_48px_rgba(28,45,34,0.08)] hover:border-[#d6b25e]/30"
+                className="group overflow-hidden rounded-2xl border border-[#ebdcb9]/50 bg-white shadow-[0_8px_30px_rgba(28,45,34,0.03)] transition-all duration-300 hover:-translate-y-1 hover:border-[#d6b25e]/30 hover:shadow-[0_20px_48px_rgba(28,45,34,0.08)]"
               >
-                <div className="relative aspect-[16/10] bg-neutral-50 overflow-hidden">
-                  {listing.images && listing.images.length > 0 ? (
-                    <img
-                      src={listing.images[0].url}
-                      alt={listing.title}
-                      className="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.03]"
-                    />
-                  ) : (
-                    <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-neutral-50 to-neutral-100">
-                      <Building2 className="h-10 w-10 text-neutral-400" />
-                    </div>
-                  )}
+                <div className="relative aspect-[16/10] overflow-hidden bg-neutral-50">
+                  <SafeRealEstateImage
+                    src={listing.images?.[0]?.url}
+                    alt={listing.title}
+                    className="h-full w-full transition-transform duration-700 ease-out group-hover:scale-[1.03]"
+                    imgClassName="h-full w-full object-cover"
+                    iconClassName="h-10 w-10 text-neutral-400"
+                  />
                   {((listing.images?.length ?? 0) > 1) && (
                     <div className="absolute bottom-3 left-3 rounded-full bg-white/90 px-2.5 py-1 text-[10px] font-bold text-[#12221b] shadow-sm backdrop-blur-md">
                       {listing.images?.length} صور
@@ -109,7 +108,7 @@ export function PropertiesPage() {
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-3 gap-2 border-y border-neutral-100 py-3 text-center text-xs text-neutral-600 bg-neutral-50/50 rounded-xl">
+                  <div className="grid grid-cols-3 gap-2 rounded-xl border-y border-neutral-100 bg-neutral-50/50 py-3 text-center text-xs text-neutral-600">
                     <div className="flex flex-col items-center gap-1">
                       <Maximize2 className="h-3.5 w-3.5 text-[#8c7a52]" />
                       <span className="font-bold text-[#12221b]">{listing.areaSqm} م²</span>

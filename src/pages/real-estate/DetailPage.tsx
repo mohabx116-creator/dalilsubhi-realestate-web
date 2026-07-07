@@ -1,8 +1,10 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { useMutation } from '@tanstack/react-query';
 import { Link, useParams } from 'react-router-dom';
 import { CheckCircle2, ChevronLeft, ChevronRight, Expand, MapPin, X } from 'lucide-react';
+import { SafeRealEstateImage } from '../../components/real-estate/SafeRealEstateImage';
 import { realEstateService } from '../../lib/api/real-estate-service';
+import type { RealEstateListing } from '../../lib/api/types';
 import {
   formatCurrency,
   formatRealEstateFloor,
@@ -15,6 +17,9 @@ import {
 } from '../../lib/formatters';
 import { ROUTES } from '../../lib/constants/routes';
 import type { ImageDto } from '../../lib/api/types';
+import {
+  getFallbackRealEstateListingBySlug,
+} from '../../lib/real-estate-fallback';
 
 export function DetailPage() {
   const { slug } = useParams<{ slug: string }>();
@@ -24,16 +29,58 @@ export function DetailPage() {
   const [whatsappUrl, setWhatsappUrl] = useState<string | null>(null);
   const [whatsappPopupBlocked, setWhatsappPopupBlocked] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [listing, setListing] = useState<RealEstateListing | null>(() => (
+    slug ? getFallbackRealEstateListingBySlug(slug) : null
+  ));
+  const [isResolving, setIsResolving] = useState(Boolean(slug));
   const whatsappWindowRef = useRef<Window | null>(null);
   const inquirySubmitLockRef = useRef(false);
 
-  const { data, isLoading, error } = useQuery({
-    queryKey: ['real-estate', 'listing', slug],
-    queryFn: () => realEstateService.getRealEstateListing(slug!),
-    enabled: !!slug,
-  });
+  useEffect(() => {
+    if (!slug) {
+      setListing(null);
+      setIsResolving(false);
+      return;
+    }
 
-  const listing = data?.data;
+    setListing(getFallbackRealEstateListingBySlug(slug));
+    setIsResolving(true);
+    setSuccess(false);
+    setWhatsappUrl(null);
+    setWhatsappPopupBlocked(false);
+    setErrorMessage(null);
+    inquirySubmitLockRef.current = false;
+
+    let active = true;
+
+    realEstateService
+      .getRealEstateListing(slug)
+      .then((response) => {
+        if (!active) {
+          return;
+        }
+
+        if (response.data) {
+          setListing(response.data);
+        }
+      })
+      .catch(() => {
+        if (!active) {
+          return;
+        }
+      })
+      .finally(() => {
+        if (!active) {
+          return;
+        }
+
+        setIsResolving(false);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [slug]);
 
   const inquiryMutation = useMutation({
     mutationFn: (payload: { listingId: string; customerName: string; customerPhone: string }) =>
@@ -75,7 +122,7 @@ export function DetailPage() {
     },
   });
 
-  if (isLoading) {
+  if (isResolving && !listing) {
     return (
       <main className="min-h-[calc(100dvh-4rem)] bg-[#f7f2e8] px-4 py-12 sm:px-6 lg:px-8">
         <div className="mx-auto flex min-h-[40vh] max-w-7xl items-center justify-center">
@@ -85,14 +132,22 @@ export function DetailPage() {
     );
   }
 
-  if (error || !listing) {
+  if (!listing) {
     return (
       <main className="min-h-[calc(100dvh-4rem)] bg-[#f7f2e8] px-4 py-12 sm:px-6 lg:px-8">
         <div className="mx-auto flex min-h-[40vh] max-w-3xl flex-col items-center justify-center text-center">
           <p className="font-bold text-error">عذرًا، لم نتمكن من العثور على العقار المطلوب.</p>
-          <Link to={ROUTES.PROPERTIES} className="mt-4 font-bold text-secondary hover:underline">
-            العودة للقائمة
-          </Link>
+          <p className="mt-3 text-sm leading-7 text-[#5f6e62]">
+            يمكننا الاستمرار في عرض بقية العقارات، أو يمكنك إضافة عقارك ليظهر في الصفحة العامة.
+          </p>
+          <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
+            <Link to={ROUTES.PROPERTIES} className="rounded-full bg-secondary px-5 py-3 font-bold text-white">
+              العودة للقائمة
+            </Link>
+            <Link to={ROUTES.SELL} className="rounded-full border border-[#e4dac5] bg-white px-5 py-3 font-bold text-[#1f2c22]">
+              أضف عقارك
+            </Link>
+          </div>
         </div>
       </main>
     );
@@ -364,7 +419,13 @@ function PropertyGallery({ images, title }: { images: ImageDto[]; title: string 
           className="group relative block h-full w-full cursor-zoom-in"
           aria-label={`فتح الصورة بحجم أكبر: ${title}`}
         >
-          <img src={images[0].url} alt={title} className="h-full w-full object-cover" />
+          <SafeRealEstateImage
+            src={images[0]?.url}
+            alt={title}
+            className="h-full w-full"
+            imgClassName="h-full w-full object-cover"
+            iconClassName="h-12 w-12 text-[#8c7f67]"
+          />
           <span className="pointer-events-none absolute bottom-4 left-4 inline-flex items-center gap-2 rounded-full bg-black/65 px-3 py-1.5 text-xs font-semibold text-white backdrop-blur-md">
             <Expand className="h-3.5 w-3.5" />
             تكبير الصورة
@@ -392,7 +453,13 @@ function PropertyGallery({ images, title }: { images: ImageDto[]; title: string 
               className="relative h-full min-w-full snap-start cursor-zoom-in"
               aria-label={`فتح الصورة ${index + 1} من ${images.length} بحجم أكبر`}
             >
-              <img src={image.url} alt={`${title} - صورة ${index + 1}`} className="h-full w-full object-cover" />
+              <SafeRealEstateImage
+                src={image.url}
+                alt={`${title} - صورة ${index + 1}`}
+                className="h-full w-full"
+                imgClassName="h-full w-full object-cover"
+                iconClassName="h-12 w-12 text-[#8c7f67]"
+              />
             </button>
           ))}
         </div>
@@ -452,7 +519,13 @@ function PropertyGallery({ images, title }: { images: ImageDto[]; title: string 
             }`}
             aria-label={`عرض الصورة ${index + 1} من ${images.length}`}
           >
-            <img src={image.url} alt={`${title} - مصغرة ${index + 1}`} className="h-full w-full object-cover" />
+            <SafeRealEstateImage
+              src={image.url}
+              alt={`${title} - مصغرة ${index + 1}`}
+              className="h-full w-full"
+              imgClassName="h-full w-full object-cover"
+              iconClassName="h-5 w-5 text-[#8c7f67]"
+            />
           </button>
         ))}
       </div>
@@ -525,10 +598,12 @@ function Lightbox({
 
         <div className="relative bg-black">
           <div className="flex min-h-[50vh] items-center justify-center">
-            <img
-              src={images[activeIndex].url}
+            <SafeRealEstateImage
+              src={images[activeIndex]?.url}
               alt={`${title} - صورة ${activeIndex + 1}`}
-              className="max-h-[75vh] w-full object-contain"
+              className="flex min-h-[50vh] w-full items-center justify-center bg-black"
+              imgClassName="max-h-[75vh] w-full object-contain"
+              iconClassName="h-16 w-16 text-white/80"
             />
           </div>
 
