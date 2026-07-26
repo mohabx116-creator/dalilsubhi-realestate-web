@@ -11,6 +11,7 @@ import {
   realEstateOwnershipProofTypeLabels,
   realEstatePhaseLabels,
 } from '../../lib/formatters';
+import { getRealEstateUserFacingErrorMessage } from '../../lib/real-estate-error';
 
 const finishingStatusOptions = [
   { value: '', label: 'بدون تحديد' },
@@ -138,7 +139,7 @@ export function SellPage() {
     });
 
     if (!response.ok) {
-      throw new Error('Cloudinary upload failed');
+      throw new Error('تعذر رفع الصور الآن. حاول مرة أخرى.');
     }
 
     const result = await response.json();
@@ -206,19 +207,8 @@ export function SellPage() {
       navigate(ROUTES.SUCCESS);
     },
     onError: (error: any) => {
-      let apiMessage = error.details?.message || error.message;
-      try {
-        if (apiMessage && apiMessage.startsWith('[')) {
-          const parsed = JSON.parse(apiMessage);
-          if (Array.isArray(parsed)) {
-            apiMessage = parsed.map((p: any) => p.message || p.path?.join('.')).join('، ');
-          }
-        }
-      } catch {
-        // keep the original message
-      }
-
-      setErrorMessage(apiMessage ? `تأكد من صحة البيانات: ${apiMessage}` : 'حدث خطأ أثناء الإرسال. حاول مرة أخرى.');
+      const apiMessage = getRealEstateUserFacingErrorMessage(error, 'تأكد من صحة البيانات المدخلة.');
+      setErrorMessage(`تأكد من صحة البيانات: ${apiMessage}`);
       setLoading(false);
     },
   });

@@ -15,6 +15,7 @@ import {
   realEstatePhaseLabels,
   realEstateOwnershipProofTypeLabels,
 } from '../../lib/formatters';
+import { getRealEstateUserFacingErrorMessage } from '../../lib/real-estate-error';
 import { ROUTES } from '../../lib/constants/routes';
 import type { ImageDto } from '../../lib/api/types';
 import {
@@ -103,20 +104,8 @@ export function DetailPage() {
     },
     onError: (error: any) => {
       inquirySubmitLockRef.current = false;
-      let apiMessage = error.details?.message || error.message;
-
-      try {
-        if (apiMessage && apiMessage.startsWith('[')) {
-          const parsed = JSON.parse(apiMessage);
-          if (Array.isArray(parsed)) {
-            apiMessage = parsed.map((p: any) => p.message || p.path?.join('.')).join('، ');
-          }
-        }
-      } catch {
-        // keep original text
-      }
-
-      setErrorMessage(apiMessage ? `تأكد من صحة البيانات: ${apiMessage}` : 'حدث خطأ أثناء الإرسال. حاول مرة أخرى.');
+      const apiMessage = getRealEstateUserFacingErrorMessage(error, 'تأكد من صحة البيانات المدخلة.');
+      setErrorMessage(`تأكد من صحة البيانات: ${apiMessage}`);
       setWhatsappPopupBlocked(false);
       whatsappWindowRef.current = null;
     },

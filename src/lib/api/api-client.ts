@@ -54,16 +54,16 @@ export interface ApiData<T> {
 
 function unwrapApiData<T>(body: unknown, status: number): ApiData<T> {
   if (!isRecord(body) || typeof body.success !== 'boolean') {
-    throw new ApiClientError('Unexpected API response shape', 'INVALID_RESPONSE', status, body);
+    throw new ApiClientError('استجابة غير متوقعة من خادم العقارات', 'INVALID_RESPONSE', status, body);
   }
 
   const response = body as unknown as ApiResponse<T>;
   if (!response.success) {
-    throw new ApiClientError(response.message || 'Request failed', 'API_ERROR', status, response);
+    throw new ApiClientError(response.message || 'تعذر تنفيذ الطلب', 'API_ERROR', status, response);
   }
 
   if (response.data === undefined) {
-    throw new ApiClientError('API response did not include data', 'INVALID_RESPONSE', status, response);
+    throw new ApiClientError('لم تتضمن استجابة خادم العقارات أي بيانات', 'INVALID_RESPONSE', status, response);
   }
 
   return { data: response.data, meta: response.meta, message: response.message || '' };
@@ -75,11 +75,11 @@ function normalizeApiError(error: unknown): ApiClientError {
   if (axios.isAxiosError<ApiResponse<unknown>>(error)) {
     const status = error.response?.status;
     const body = error.response?.data;
-    const message = getEnvelopeMessage(body) || error.message || 'Unable to reach Compound OS API';
+    const message = getEnvelopeMessage(body) || error.message || 'تعذر الاتصال بخادم العقارات';
     return new ApiClientError(message, status ? 'HTTP_ERROR' : 'NETWORK_ERROR', status, body);
   }
 
-  return new ApiClientError(error instanceof Error ? error.message : 'Unexpected API client error', 'UNKNOWN_ERROR');
+  return new ApiClientError(error instanceof Error ? error.message : 'خطأ غير متوقع في عميل العقارات', 'UNKNOWN_ERROR');
 }
 
 export async function getApiData<T>(path: string, params?: object): Promise<ApiData<T>> {
